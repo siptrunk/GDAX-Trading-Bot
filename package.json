@@ -1,0 +1,18 @@
+{
+  "name": "gdax-trading-bot",
+  "version": "1.0.0",
+  "description": "Trading bot for GDAX exchange",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Kenshiro",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "gdax": "^0.5.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Kenshiro-28/GDAX-Trading-Bot.git"
+  }
+}
