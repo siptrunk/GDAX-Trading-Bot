@@ -139,7 +139,7 @@ const getProductTickerCallback = (error, response, data) =>
 
         let estimatedProfit = numberOfCyclesCompleted * SEED_BTC_AMOUNT * MINIMUM_SELL_PROFIT;
 
-        console.log("\n[INFO] Number of cycles completed: " + numberOfCyclesCompleted + ", estimated profit: " + estimatedProfit.toFixed(2) + " EUR");
+        console.log("\n[INFO] Number of cycles completed: " + numberOfCyclesCompleted + ", estimated profit: " + Math.floor(estimatedProfit) + " EUR");
 
         authenticatedClient.getOrders(getOrdersCallback);
     }
