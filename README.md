@@ -6,20 +6,18 @@ Keep in mind that trading is a risky activity that can involve a loss of money. 
 
 ## Trading strategy
 
-The GDAX Trading Bot continuously monitors the price of bitcoin and issues a buy order when the price begins to rise above the weighted average of the previous prices. Once the buy order is filled, the program sells all the available bitcoins with a small increase over the purchase price and begins to evaluate the next buy order. It uses only limit orders with no fees.
-
-If the price trend is upward, the benefit is assured and no user action is required. If the price trend is downward and there are sell orders that are not filled for too long, you can cancel them or wait for the price trend to change. To cancel a sell order you must go to the GDAX website, cancel the current sell order and issue a new limit sell order at a lower price.
+The trading strategy consists of issuing a large number of low value orders. The program continuously monitors the price of bitcoin and issues a market buy order when the price begins to rise above the weighted average of the previous prices. Once the buy order is filled, the program issues a limit sell order with a one percent increase over the purchase price.
 
 ### The seed
 
 The seed is the amount of bitcoins that the program will buy and sell continuously to earn euros. The greater the seed, the greater the benefit. The seed value must be set in the program variable SEED_BTC_AMOUNT.
 
-It is recommended that the seed does not exceed one twentieth of the amount of bitcoins you can buy.
+It is recommended that the seed does not exceed one hundredth of the amount of bitcoins you can buy.
 
 Example:
 
-- If your current euro balance is 2000 euros and the bitcoin price is 10000 euros you can buy 0.2 btc
-- If you can buy 0.2 btc the recommended seed is 0.01 btc
+- If your current euro balance is 1000 euros and the bitcoin price is 10000 euros you can buy 0.1 btc
+- If you can buy 0.1 btc the recommended seed is 0.001 btc
 
 ## Quick guide
 

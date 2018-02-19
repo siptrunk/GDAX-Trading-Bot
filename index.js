@@ -2,7 +2,7 @@
  ============================================================================
  Name        : GDAX Trading Bot
  Author      : Kenshiro
- Version     : 2.00
+ Version     : 3.00
  Copyright   : GNU General Public License (GPLv3)
  Description : Trading bot for GDAX exchange
  ============================================================================
@@ -18,19 +18,24 @@ const GDAX_URI = 'https://api.gdax.com';
 
 const CURRENCY_PAIR = 'BTC-EUR';
 
+const EURO_TICKER = 'EUR';
+const BITCOIN_TICKER = 'BTC';
+
 const SLEEP_TIME = 30000;
 
 //Minimum balance of the euro wallet to allow a purchase of bitcoin
-const MINIMUM_EUR_BALANCE = 10.0;
+const MINIMUM_EUR_BALANCE = 1.0;
 
-//The seed is the amount of bitcoin that will be bought and sold continuously (minimum: 0.0001 btc)
-const SEED_BTC_AMOUNT = 0.02;
+//The seed is the amount of bitcoin that will be bought and sold continuously
+const SEED_BTC_AMOUNT = 0.001;
 
 //Minimum increase over the average price to allow a purchase of bitcoin
 const MINIMUM_PRICE_INCREMENT = 0.01;
 
-//Minimum expected gain of euros selling 1 bitcoin
-const MINIMUM_SELL_PROFIT = 100.0; 
+//Profit percentage selling 1 bitcoin
+const PROFIT_PERCENTAGE = 1.0; 
+
+const TAKER_FEE_PERCENTAGE = 0.25;
 
 /*If the difference between the current price of bitcoin and the price of the
 purchase order reaches this amount, the purchase order will be canceled*/
@@ -48,6 +53,8 @@ let btcAvailable = 0;
 let btcBalance = 0;
 
 let numberOfCyclesCompleted = 0;
+
+let estimatedProfit = 0;
 
 let authenticatedClient = null;
 let publicClient = null;
@@ -69,6 +76,7 @@ const sellOrderCallback = (error, response, data) =>
 
     if ((data!=null) && (data.status==='pending'))
     {
+        estimatedProfit = estimatedProfit + (lastBuyOrderPrice * SEED_BTC_AMOUNT * (PROFIT_PERCENTAGE - TAKER_FEE_PERCENTAGE) / 100.0);
         lastBuyOrderPrice = null;
         numberOfCyclesCompleted++;
  	}
@@ -83,8 +91,8 @@ const buyOrderCallback = (error, response, data) =>
 
     if ((data!=null) && (data.status==='pending'))
     {
-        if ((lastBuyOrderPrice===null) || (lastBuyOrderPrice<parseFloat(data.price)))
-            lastBuyOrderPrice = parseFloat(data.price);
+        if ((lastBuyOrderPrice===null) || (lastBuyOrderPrice<currentPrice))
+            lastBuyOrderPrice = currentPrice;
     }
 
     return console.log(data);
@@ -113,7 +121,7 @@ const getOrdersCallback = (error, response, data) =>
 
         if ((eurAvailable>=MINIMUM_EUR_BALANCE) && (averagePrice!=null) && (lastBuyOrderPrice==null))
             placeBuyOrder();
-        else if ((btcAvailable>=SEED_BTC_AMOUNT) && (lastBuyOrderPrice!=null))
+        else if (lastBuyOrderPrice!=null)
             placeSellOrder();
         
         if (averagePrice===null)
@@ -137,9 +145,7 @@ const getProductTickerCallback = (error, response, data) =>
         else
             console.log("[BITCOIN TICKER] Now: " + currentPrice.toFixed(2) + " EUR, average: " + averagePrice.toFixed(2) + " EUR, time: " + data.time);
 
-        let estimatedProfit = numberOfCyclesCompleted * SEED_BTC_AMOUNT * MINIMUM_SELL_PROFIT;
-
-        console.log("\n[INFO] Number of cycles completed: " + numberOfCyclesCompleted + ", estimated profit: " + Math.floor(estimatedProfit) + " EUR");
+        console.log("\n[INFO] Number of cycles completed: " + numberOfCyclesCompleted + ", estimated profit: " + estimatedProfit.toFixed(2) + " EUR");
 
         authenticatedClient.getOrders(getOrdersCallback);
     }
@@ -154,12 +160,12 @@ const getAccountsCallback = (error, response, data) =>
     {
         for(var item of data)
         {   
-	        if (item.currency==='EUR')
+	        if (item.currency===EURO_TICKER)
             {
 	            eurAvailable = parseInt(item.available);
 	            eurBalance = parseInt(item.balance);
             }
-	        else if (item.currency==='BTC')
+	        else if (item.currency===BITCOIN_TICKER)
             {
 		        btcAvailable = parseFloat(item.available);
                 btcBalance = parseFloat(item.balance);
@@ -185,11 +191,10 @@ function placeBuyOrder()
 
         const buyParams = 
 	    {
-            'price': currentPrice.toFixed(2),
+            'type': 'market',
             'size': buySize.toFixed(8),
             'product_id': CURRENCY_PAIR,
-		    'post_only': true,
-	    };
+		};
 
         console.log("\x1b[42m%s\x1b[0m", "[BUY ORDER] Price: " + currentPrice.toFixed(2) + " EUR, size: " + buySize.toFixed(8) + " BTC");
 
@@ -202,9 +207,9 @@ function placeSellOrder()
     let sellPrice;
     
     if (lastBuyOrderPrice<currentPrice)
-        sellPrice = currentPrice + MINIMUM_SELL_PROFIT;
+        sellPrice = currentPrice * ((100.0 + PROFIT_PERCENTAGE)/100.0);
     else
-        sellPrice = lastBuyOrderPrice + MINIMUM_SELL_PROFIT;
+        sellPrice = lastBuyOrderPrice * ((100.0 + PROFIT_PERCENTAGE)/100.0);
 
     const sellSize = Math.floor(btcAvailable*100000000) / 100000000;
 
