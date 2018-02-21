@@ -2,7 +2,7 @@
  ============================================================================
  Name        : GDAX Trading Bot
  Author      : Kenshiro
- Version     : 3.00
+ Version     : 3.01
  Copyright   : GNU General Public License (GPLv3)
  Description : Trading bot for GDAX exchange
  ============================================================================
@@ -24,7 +24,7 @@ const BITCOIN_TICKER = 'BTC';
 const SLEEP_TIME = 30000;
 
 //Minimum balance of the euro wallet to allow a purchase of bitcoin
-const MINIMUM_EUR_BALANCE = 1.0;
+const MINIMUM_EUR_BALANCE = 10.0;
 
 //The seed is the amount of bitcoin that will be bought and sold continuously
 const SEED_BTC_AMOUNT = 0.001;
