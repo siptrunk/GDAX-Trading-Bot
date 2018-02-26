@@ -2,7 +2,7 @@
  ============================================================================
  Name        : GDAX Trading Bot
  Author      : Kenshiro
- Version     : 3.01
+ Version     : 3.02
  Copyright   : GNU General Public License (GPLv3)
  Description : Trading bot for GDAX exchange
  ============================================================================
@@ -69,7 +69,15 @@ const cancelOrderCallback = (error, response, data) =>
     lastBuyOrderPrice = null;
 }
 
-const sellOrderCallback = (error, response, data) => 
+const sellSeedCallback = (error, response, data) => 
+{
+    if (error)
+        return console.log(error);
+
+    return console.log(data);
+}
+
+const sellPreviousPurchaseCallback = (error, response, data) => 
 {
     if (error)
         return console.log(error);
@@ -121,9 +129,11 @@ const getOrdersCallback = (error, response, data) =>
 
         if ((eurAvailable>=MINIMUM_EUR_BALANCE) && (averagePrice!=null) && (lastBuyOrderPrice==null))
             placeBuyOrder();
-        else if (lastBuyOrderPrice!=null)
-            placeSellOrder();
-        
+        else if ((btcAvailable>=SEED_BTC_AMOUNT) && (lastBuyOrderPrice!=null))
+            sellPreviousPurchase();
+        else if ((btcAvailable>=SEED_BTC_AMOUNT) && (lastBuyOrderPrice==null) && (averagePrice!=null))
+            sellSeed();
+         
         if (averagePrice===null)
             averagePrice = currentPrice;
         else
@@ -202,7 +212,30 @@ function placeBuyOrder()
     }
 }
 
-function placeSellOrder() 
+function sellSeed()
+{
+    let sellPrice = currentPrice + 0.01;
+    
+    const sellSize = SEED_BTC_AMOUNT;
+
+    const sellParams = 
+    {
+        'price': sellPrice.toFixed(2),
+        'size': sellSize.toFixed(8),
+        'product_id': CURRENCY_PAIR,
+        'post_only': true,
+        'time_in_force': 'GTT',
+        'cancel_after': 'hour'
+    };
+
+    console.log("[INFO] Selling seed ...\n");
+
+    console.log("\x1b[41m%s\x1b[0m", "[SELL ORDER] Price: " + sellPrice.toFixed(2) + " EUR, size: " + sellSize.toFixed(8) + " BTC"); 
+
+    authenticatedClient.sell(sellParams, sellSeedCallback);
+}
+
+function sellPreviousPurchase() 
 {
     let sellPrice;
     
@@ -211,7 +244,7 @@ function placeSellOrder()
     else
         sellPrice = lastBuyOrderPrice * ((100.0 + PROFIT_PERCENTAGE)/100.0);
 
-    const sellSize = Math.floor(btcAvailable*100000000) / 100000000;
+    const sellSize = SEED_BTC_AMOUNT;
 
     const sellParams = 
     {
@@ -223,7 +256,7 @@ function placeSellOrder()
 
     console.log("\x1b[41m%s\x1b[0m", "[SELL ORDER] Price: " + sellPrice.toFixed(2) + " EUR, size: " + sellSize.toFixed(8) + " BTC"); 
 
-    authenticatedClient.sell(sellParams, sellOrderCallback);
+    authenticatedClient.sell(sellParams, sellPreviousPurchaseCallback);
 }
 
 //Main logic
