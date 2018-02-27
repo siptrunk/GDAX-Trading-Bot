@@ -2,7 +2,7 @@
  ============================================================================
  Name        : GDAX Trading Bot
  Author      : Kenshiro
- Version     : 3.02
+ Version     : 3.03
  Copyright   : GNU General Public License (GPLv3)
  Description : Trading bot for GDAX exchange
  ============================================================================
@@ -23,11 +23,8 @@ const BITCOIN_TICKER = 'BTC';
 
 const SLEEP_TIME = 30000;
 
-//Minimum balance of the euro wallet to allow a purchase of bitcoin
-const MINIMUM_EUR_BALANCE = 10.0;
-
 //The seed is the amount of bitcoin that will be bought and sold continuously
-const SEED_BTC_AMOUNT = 0.001;
+const SEED_BTC_AMOUNT = 0.003;
 
 //Minimum increase over the average price to allow a purchase of bitcoin
 const MINIMUM_PRICE_INCREMENT = 0.01;
@@ -127,7 +124,9 @@ const getOrdersCallback = (error, response, data) =>
    
         console.log('');
 
-        if ((eurAvailable>=MINIMUM_EUR_BALANCE) && (averagePrice!=null) && (lastBuyOrderPrice==null))
+        const safeEurAmount = SEED_BTC_AMOUNT * currentPrice * 110 / 100;
+
+        if ((eurAvailable>=safeEurAmount) && (averagePrice!=null) && (lastBuyOrderPrice==null))
             placeBuyOrder();
         else if ((btcAvailable>=SEED_BTC_AMOUNT) && (lastBuyOrderPrice!=null))
             sellPreviousPurchase();
@@ -214,7 +213,7 @@ function placeBuyOrder()
 
 function sellSeed()
 {
-    let sellPrice = currentPrice + 0.01;
+    const sellPrice = currentPrice + 0.01;
     
     const sellSize = SEED_BTC_AMOUNT;
 
