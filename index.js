@@ -24,18 +24,18 @@ const BITCOIN_TICKER = 'BTC';
 const SLEEP_TIME = 30000;
 
 //The seed is the amount of bitcoin that will be bought and sold continuously
-const SEED_BTC_AMOUNT = 0.003;
+const SEED_BTC_AMOUNT = 0.01;
 
 //Minimum increase over the average price to allow a purchase of bitcoin
 const MINIMUM_PRICE_INCREMENT = 0.01;
 
 //Profit percentage selling 1 bitcoin
-const PROFIT_PERCENTAGE = 1.0; 
+const PROFIT_PERCENTAGE = 0.5; 
 
 const TAKER_FEE_PERCENTAGE = 0.25;
 
-/*If the difference between the current price of bitcoin and the price of the
-purchase order reaches this amount, the purchase order will be canceled*/
+/*If the difference between the current price of bitcoin and the price of a
+limit buy order reaches this amount, the limit buy order will be canceled*/
 const CANCEL_BUY_ORDER_THRESHOLD = 0.01;
 
 let currentPrice = null;
