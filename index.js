@@ -27,7 +27,7 @@ const SLEEP_TIME = 30000;
 const SEED_BTC_AMOUNT = 0.01;
 
 //Minimum increase over the average price to allow a purchase of bitcoin
-const MINIMUM_PRICE_INCREMENT = 0.01;
+const MINIMUM_PRICE_INCREMENT = 1.0;
 
 //Profit percentage selling 1 bitcoin
 const PROFIT_PERCENTAGE = 0.5; 
