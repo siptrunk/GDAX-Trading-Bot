@@ -2,11 +2,13 @@
  ============================================================================
  Name        : GDAX Trading Bot
  Author      : Kenshiro
- Version     : 3.03
+ Version     : 3.06
  Copyright   : GNU General Public License (GPLv3)
  Description : Trading bot for GDAX exchange
  ============================================================================
  */
+
+const APP_VERSION = "v3.06";
 
 const GdaxModule = require('gdax');
 
@@ -24,21 +26,20 @@ const BITCOIN_TICKER = 'BTC';
 const SLEEP_TIME = 30000;
 
 //The seed is the amount of bitcoin that will be bought and sold continuously
-const SEED_BTC_AMOUNT = 0.01;
+const SEED_BTC_AMOUNT = 0.05;
 
 //Minimum increase over the average price to allow a purchase of bitcoin
-const MINIMUM_PRICE_INCREMENT = 1.0;
+const MINIMUM_PRICE_INCREMENT = 0.01;
 
 //Profit percentage selling 1 bitcoin
-const PROFIT_PERCENTAGE = 0.5; 
-
-const TAKER_FEE_PERCENTAGE = 0.25;
+const PROFIT_PERCENTAGE = 0.1; 
 
 /*If the difference between the current price of bitcoin and the price of a
 limit buy order reaches this amount, the limit buy order will be canceled*/
 const CANCEL_BUY_ORDER_THRESHOLD = 0.01;
 
-let currentPrice = null;
+let askPrice = null;
+let bidPrice = null;
 let averagePrice = null;
 
 let lastBuyOrderPrice = null;
@@ -66,14 +67,6 @@ const cancelOrderCallback = (error, response, data) =>
     lastBuyOrderPrice = null;
 }
 
-const sellSeedCallback = (error, response, data) => 
-{
-    if (error)
-        return console.log(error);
-
-    return console.log(data);
-}
-
 const sellPreviousPurchaseCallback = (error, response, data) => 
 {
     if (error)
@@ -81,7 +74,8 @@ const sellPreviousPurchaseCallback = (error, response, data) =>
 
     if ((data!=null) && (data.status==='pending'))
     {
-        estimatedProfit = estimatedProfit + (lastBuyOrderPrice * SEED_BTC_AMOUNT * (PROFIT_PERCENTAGE - TAKER_FEE_PERCENTAGE) / 100.0);
+        estimatedProfit = estimatedProfit + SEED_BTC_AMOUNT * (data.price - lastBuyOrderPrice);
+        averagePrice = lastBuyOrderPrice;
         lastBuyOrderPrice = null;
         numberOfCyclesCompleted++;
  	}
@@ -96,8 +90,8 @@ const buyOrderCallback = (error, response, data) =>
 
     if ((data!=null) && (data.status==='pending'))
     {
-        if ((lastBuyOrderPrice===null) || (lastBuyOrderPrice<currentPrice))
-            lastBuyOrderPrice = currentPrice;
+        if ((lastBuyOrderPrice===null) || (lastBuyOrderPrice<askPrice))
+            lastBuyOrderPrice = askPrice;
     }
 
     return console.log(data);
@@ -113,30 +107,28 @@ const getOrdersCallback = (error, response, data) =>
         for(let item of data)
         { 
             let orderPrice = parseFloat(item.price);
-            let priceDifference = Math.abs(orderPrice - currentPrice);
+            let priceDifference = parseInt(Math.abs(orderPrice - bidPrice) * 100) / 100;
       
 	        if ((item.product_id===CURRENCY_PAIR) && (item.side==='buy') && (priceDifference>=CANCEL_BUY_ORDER_THRESHOLD))
             {
-	            console.log("\n[INFO] Canceling buy order (order price: " + orderPrice.toFixed(2) + " EUR, current price: " + currentPrice.toFixed(2) + " EUR)");
+	            console.log("\n[INFO] Canceling buy order (order price: " + orderPrice.toFixed(2) + " EUR, bid price: " + bidPrice.toFixed(2) + " EUR)");
 		        authenticatedClient.cancelOrder(item.id, cancelOrderCallback);
             }
         }
    
         console.log('');
 
-        const safeEurAmount = SEED_BTC_AMOUNT * currentPrice * 110 / 100;
+        const buyPrice = SEED_BTC_AMOUNT * askPrice;
 
-        if ((eurAvailable>=safeEurAmount) && (averagePrice!=null) && (lastBuyOrderPrice==null))
+        if ((eurAvailable>=buyPrice) && (averagePrice!=null) && (lastBuyOrderPrice==null))
             placeBuyOrder();
         else if ((btcAvailable>=SEED_BTC_AMOUNT) && (lastBuyOrderPrice!=null))
             sellPreviousPurchase();
-        else if ((btcAvailable>=SEED_BTC_AMOUNT) && (lastBuyOrderPrice==null) && (averagePrice!=null))
-            sellSeed();
          
         if (averagePrice===null)
-            averagePrice = currentPrice;
+            averagePrice = askPrice;
         else
-            averagePrice = (averagePrice*10 + currentPrice) / 11;
+            averagePrice = (averagePrice*10 + askPrice) / 11;
     }
 }
 
@@ -147,12 +139,13 @@ const getProductTickerCallback = (error, response, data) =>
 
     if (data!=null)
     {
-	    currentPrice = parseFloat(data.bid);
+	    askPrice = parseFloat(data.ask);
+	    bidPrice = parseFloat(data.bid);
 
         if (averagePrice===null)
-            console.log("[BITCOIN TICKER] Now: " + currentPrice.toFixed(2) + " EUR, time: " + data.time);
+            console.log("[BITCOIN TICKER] Now: " + askPrice.toFixed(2) + " EUR, time: " + data.time);
         else
-            console.log("[BITCOIN TICKER] Now: " + currentPrice.toFixed(2) + " EUR, average: " + averagePrice.toFixed(2) + " EUR, time: " + data.time);
+            console.log("[BITCOIN TICKER] Now: " + askPrice.toFixed(2) + " EUR, average: " + averagePrice.toFixed(2) + " EUR, time: " + data.time);
 
         console.log("\n[INFO] Number of cycles completed: " + numberOfCyclesCompleted + ", estimated profit: " + estimatedProfit.toFixed(2) + " EUR");
 
@@ -192,58 +185,39 @@ const getAccountsCallback = (error, response, data) =>
 
 function placeBuyOrder() 
 {
-    let priceIncrement = currentPrice - averagePrice;
+    let priceIncrement = askPrice - averagePrice;
 
     if (priceIncrement>=MINIMUM_PRICE_INCREMENT)
     {
-        let buySize = SEED_BTC_AMOUNT;
+        const buyPrice = bidPrice;
+        const buySize = SEED_BTC_AMOUNT;
 
         const buyParams = 
 	    {
-            'type': 'market',
+            'price': buyPrice.toFixed(2),
             'size': buySize.toFixed(8),
             'product_id': CURRENCY_PAIR,
+            'post_only': true
 		};
 
-        console.log("\x1b[42m%s\x1b[0m", "[BUY ORDER] Price: " + currentPrice.toFixed(2) + " EUR, size: " + buySize.toFixed(8) + " BTC");
+        console.log("\x1b[42m%s\x1b[0m", "[BUY ORDER] Price: " + buyPrice.toFixed(2) + " EUR, size: " + buySize.toFixed(8) + " BTC");
 
         authenticatedClient.buy(buyParams, buyOrderCallback);
     }
 }
 
-function sellSeed()
-{
-    const sellPrice = currentPrice + 0.01;
-    
-    const sellSize = SEED_BTC_AMOUNT;
-
-    const sellParams = 
-    {
-        'price': sellPrice.toFixed(2),
-        'size': sellSize.toFixed(8),
-        'product_id': CURRENCY_PAIR,
-        'post_only': true,
-        'time_in_force': 'GTT',
-        'cancel_after': 'hour'
-    };
-
-    console.log("[INFO] Selling seed ...\n");
-
-    console.log("\x1b[41m%s\x1b[0m", "[SELL ORDER] Price: " + sellPrice.toFixed(2) + " EUR, size: " + sellSize.toFixed(8) + " BTC"); 
-
-    authenticatedClient.sell(sellParams, sellSeedCallback);
-}
-
 function sellPreviousPurchase() 
 {
     let sellPrice;
-    
-    if (lastBuyOrderPrice<currentPrice)
-        sellPrice = currentPrice * ((100.0 + PROFIT_PERCENTAGE)/100.0);
-    else
-        sellPrice = lastBuyOrderPrice * ((100.0 + PROFIT_PERCENTAGE)/100.0);
 
-    const sellSize = SEED_BTC_AMOUNT;
+    const priceMultiplier = (100.0 + PROFIT_PERCENTAGE) / 100.0;
+    
+    if (lastBuyOrderPrice<askPrice)
+        sellPrice = askPrice * priceMultiplier;
+    else
+        sellPrice = lastBuyOrderPrice * priceMultiplier;
+
+    const sellSize = btcAvailable;
 
     const sellParams = 
     {
@@ -271,7 +245,7 @@ console.log("                                  ____        __");
 console.log("                                 / __ )____  / /_");
 console.log("                                / __  / __ \\/ __/");
 console.log("                               / /_/ / /_/ / /_ ");
-console.log("                              /_____/\\____/\\__/");
+console.log("                              /_____/\\____/\\__/   " + APP_VERSION);
 
 console.log("\n\n\n\n                    \"The Revolution Will Be Decentralized\"");
 
@@ -281,7 +255,8 @@ setInterval(() =>
 {
     console.log('\n\n');
 
-    currentPrice = null;
+    askPrice = null;
+    bidPrice = null;
 
     eurAvailable = 0;
     eurBalance = 0;
