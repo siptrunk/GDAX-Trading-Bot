@@ -12,12 +12,12 @@ The trading strategy consists of issuing a large number of low value orders. The
 
 The seed is the amount of bitcoins that the program will buy and sell continuously to earn euros. The greater the seed, the greater the benefit. The seed value must be set in the program variable SEED_BTC_AMOUNT.
 
-It is recommended that the seed does not exceed one twentieth of the amount of bitcoins you can buy.
+It is recommended that the seed does not exceed one thirtieth of the amount of bitcoins you can buy.
 
 Example:
 
-- If your current euro balance is 1000 euros and the bitcoin price is 10000 euros you can buy 0.1 btc
-- If you can buy 0.1 btc the recommended seed is 0.005 btc
+- If your current euro balance is 3000 euros and the bitcoin price is 10000 euros you can buy 0.3 btc
+- If you can buy 0.3 btc the recommended seed is 0.01 btc
 
 ## Quick guide
 

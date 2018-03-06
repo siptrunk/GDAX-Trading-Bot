@@ -2,13 +2,13 @@
  ============================================================================
  Name        : GDAX Trading Bot
  Author      : Kenshiro
- Version     : 3.06
+ Version     : 3.07
  Copyright   : GNU General Public License (GPLv3)
  Description : Trading bot for GDAX exchange
  ============================================================================
  */
 
-const APP_VERSION = "v3.06";
+const APP_VERSION = "v3.07";
 
 const GdaxModule = require('gdax');
 
@@ -26,7 +26,7 @@ const BITCOIN_TICKER = 'BTC';
 const SLEEP_TIME = 30000;
 
 //The seed is the amount of bitcoin that will be bought and sold continuously
-const SEED_BTC_AMOUNT = 0.05;
+const SEED_BTC_AMOUNT = 0.001;
 
 //Minimum increase over the average price to allow a purchase of bitcoin
 const MINIMUM_PRICE_INCREMENT = 0.01;
@@ -38,7 +38,6 @@ const PROFIT_PERCENTAGE = 0.1;
 limit buy order reaches this amount, the limit buy order will be canceled*/
 const CANCEL_BUY_ORDER_THRESHOLD = 0.01;
 
-let askPrice = null;
 let bidPrice = null;
 let averagePrice = null;
 
@@ -90,8 +89,10 @@ const buyOrderCallback = (error, response, data) =>
 
     if ((data!=null) && (data.status==='pending'))
     {
-        if ((lastBuyOrderPrice===null) || (lastBuyOrderPrice<askPrice))
-            lastBuyOrderPrice = askPrice;
+        const buyPrice = parseFloat(data.price);
+
+        if ((lastBuyOrderPrice===null) || (lastBuyOrderPrice<buyPrice))
+            lastBuyOrderPrice = buyPrice;
     }
 
     return console.log(data);
@@ -106,8 +107,8 @@ const getOrdersCallback = (error, response, data) =>
     {
         for(let item of data)
         { 
-            let orderPrice = parseFloat(item.price);
-            let priceDifference = parseInt(Math.abs(orderPrice - bidPrice) * 100) / 100;
+            const orderPrice = parseFloat(item.price);
+            const priceDifference = parseInt(Math.abs(orderPrice - bidPrice) * 100) / 100;
       
 	        if ((item.product_id===CURRENCY_PAIR) && (item.side==='buy') && (priceDifference>=CANCEL_BUY_ORDER_THRESHOLD))
             {
@@ -118,7 +119,7 @@ const getOrdersCallback = (error, response, data) =>
    
         console.log('');
 
-        const buyPrice = SEED_BTC_AMOUNT * askPrice;
+        const buyPrice = SEED_BTC_AMOUNT * bidPrice;
 
         if ((eurAvailable>=buyPrice) && (averagePrice!=null) && (lastBuyOrderPrice==null))
             placeBuyOrder();
@@ -126,9 +127,9 @@ const getOrdersCallback = (error, response, data) =>
             sellPreviousPurchase();
          
         if (averagePrice===null)
-            averagePrice = askPrice;
+            averagePrice = bidPrice;
         else
-            averagePrice = (averagePrice*10 + askPrice) / 11;
+            averagePrice = (averagePrice*10 + bidPrice) / 11;
     }
 }
 
@@ -139,13 +140,12 @@ const getProductTickerCallback = (error, response, data) =>
 
     if (data!=null)
     {
-	    askPrice = parseFloat(data.ask);
 	    bidPrice = parseFloat(data.bid);
 
         if (averagePrice===null)
-            console.log("[BITCOIN TICKER] Now: " + askPrice.toFixed(2) + " EUR, time: " + data.time);
+            console.log("[BITCOIN TICKER] Now: " + bidPrice.toFixed(2) + " EUR, time: " + data.time);
         else
-            console.log("[BITCOIN TICKER] Now: " + askPrice.toFixed(2) + " EUR, average: " + averagePrice.toFixed(2) + " EUR, time: " + data.time);
+            console.log("[BITCOIN TICKER] Now: " + bidPrice.toFixed(2) + " EUR, average: " + averagePrice.toFixed(2) + " EUR, time: " + data.time);
 
         console.log("\n[INFO] Number of cycles completed: " + numberOfCyclesCompleted + ", estimated profit: " + estimatedProfit.toFixed(2) + " EUR");
 
@@ -185,7 +185,7 @@ const getAccountsCallback = (error, response, data) =>
 
 function placeBuyOrder() 
 {
-    let priceIncrement = askPrice - averagePrice;
+    const priceIncrement = bidPrice - averagePrice;
 
     if (priceIncrement>=MINIMUM_PRICE_INCREMENT)
     {
@@ -212,8 +212,8 @@ function sellPreviousPurchase()
 
     const priceMultiplier = (100.0 + PROFIT_PERCENTAGE) / 100.0;
     
-    if (lastBuyOrderPrice<askPrice)
-        sellPrice = askPrice * priceMultiplier;
+    if (lastBuyOrderPrice<bidPrice)
+        sellPrice = bidPrice * priceMultiplier;
     else
         sellPrice = lastBuyOrderPrice * priceMultiplier;
 
@@ -255,7 +255,6 @@ setInterval(() =>
 {
     console.log('\n\n');
 
-    askPrice = null;
     bidPrice = null;
 
     eurAvailable = 0;
