@@ -6,11 +6,11 @@ Keep in mind that trading is a risky activity that can involve a loss of money. 
 
 ## Trading strategy
 
-The trading strategy consists of issuing a large number of low value orders. The program continuously monitors the price of bitcoin and issues a limit buy order when the price begins to rise above the weighted average of the previous prices. Once the buy order is filled, the program issues a limit sell order with a small increase over the purchase price.
+The trading strategy consists of issuing a large number of low value orders. The program continuously monitors the price of bitcoin and issues a limit sell order when the price begins to fall below the weighted average of the previous prices. Once the sell order is filled, the program issues a limit buy order for a larger quantity of bitcoins at a cheaper price.
 
 ### The seed
 
-The seed is the amount of bitcoins that the program will buy and sell continuously to earn euros. The greater the seed, the greater the benefit. The seed value must be set in the program variable SEED_BTC_AMOUNT.
+The seed is the amount of bitcoins that the program will trade continuously to earn more bitcoins. The greater the seed, the greater the benefit. The seed value must be set in the program variable SEED_BTC_AMOUNT.
 
 It is recommended that the seed does not exceed one thirtieth of the amount of bitcoins you can buy.
 
@@ -25,7 +25,8 @@ Example:
 
 - Register in Coinbase (https://www.coinbase.com)
 - Use the Coinbase account to login to the Gdax exchange (https://www.gdax.com)
-- Deposit the amount of euros you want with a SEPA transfer.
+- Deposit the amount of euros you want with a SEPA transfer
+- Buy bitcoins using a limit order to avoid fees
 
 ### API Key generation
 
