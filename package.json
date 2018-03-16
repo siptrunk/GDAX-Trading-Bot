@@ -1,6 +1,6 @@
 {
   "name": "gdax-trading-bot",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "Trading bot for GDAX exchange",
   "main": "index.js",
   "scripts": {

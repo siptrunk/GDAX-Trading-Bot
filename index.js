@@ -2,13 +2,13 @@
  ============================================================================
  Name        : GDAX Trading Bot
  Author      : Kenshiro
- Version     : 4.00
+ Version     : 4.01
  Copyright   : GNU General Public License (GPLv3)
  Description : Trading bot for GDAX exchange
  ============================================================================
  */
 
-const APP_VERSION = "v4.00";
+const APP_VERSION = "v4.01";
 
 const GdaxModule = require('gdax');
 
@@ -26,14 +26,12 @@ const BITCOIN_TICKER = 'BTC';
 const SLEEP_TIME = 30000;
 
 // The seed is the amount of bitcoins that the program will trade continuously
-const SEED_BTC_AMOUNT = 0.03;
-
-/* Minimum difference in euros between the current bitcoin price and the average
- * to allow the sale of a seed */
-const MINIMUM_PRICE_DECREMENT = 10.00;
+const SEED_BTC_AMOUNT = 0.05;
 
 // Profit percentage trading a seed
-const PROFIT_PERCENTAGE = 0.1; 
+const PROFIT_PERCENTAGE = 0.01; 
+
+const MINIMUM_SELL_PRICE_MULTIPLIER = (100.0 - 7.0 * PROFIT_PERCENTAGE) / 100.0;
 
 /* If the difference between the current price of bitcoin and the price of a
  * limit sell order reaches this amount, the limit sell order will be canceled */
@@ -79,7 +77,7 @@ const buyOrderCallback = (error, response, data) =>
     if ((data!=null) && (data.status==='pending'))
     {
         estimatedProfit = estimatedProfit + parseFloat(data.size) - SEED_BTC_AMOUNT;
-        averagePrice = lastSellOrderPrice;
+        averagePrice = lastSellOrderPrice;        
         lastSellOrderPrice = null;
         numberOfCyclesCompleted++;
  	}
@@ -192,9 +190,9 @@ const getAccountsCallback = (error, response, data) =>
 
 function placeSellOrder() 
 {
-    const priceDecrement = averagePrice - askPrice;
+    const minimumSellPrice = averagePrice * MINIMUM_SELL_PRICE_MULTIPLIER;
 
-    if (priceDecrement>=MINIMUM_PRICE_DECREMENT)
+    if (askPrice<=minimumSellPrice)
     {
         const sellPrice = askPrice;
         const sellSize = SEED_BTC_AMOUNT;
@@ -224,7 +222,7 @@ function placeBuyOrder()
     else
         buyPrice = lastSellOrderPrice * priceMultiplier;
 
-    const buySize = parseInt((eurAvailable / buyPrice) * 10000000) / 10000000;
+    const buySize = (eurAvailable - 0.01) / buyPrice;
 
     const buyParams = 
     {
