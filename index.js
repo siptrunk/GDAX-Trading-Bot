@@ -2,13 +2,13 @@
  ============================================================================
  Name        : GDAX Trading Bot
  Author      : Kenshiro
- Version     : 4.03
+ Version     : 4.04
  Copyright   : GNU General Public License (GPLv3)
  Description : Trading bot for GDAX exchange
  ============================================================================
  */
 
-const APP_VERSION = "v4.03";
+const APP_VERSION = "v4.04";
 
 const GdaxModule = require('gdax');
 
@@ -26,10 +26,10 @@ const BITCOIN_TICKER = 'BTC';
 const SLEEP_TIME = 30000;
 
 // The seed is the amount of bitcoins that the program will trade continuously
-const SEED_BTC_AMOUNT = 0.01;
+const SEED_BTC_AMOUNT = 0.03;
 
 // Profit percentage trading a seed
-const PROFIT_PERCENTAGE = 0.5; 
+const PROFIT_PERCENTAGE = 0.25; 
 
 const MINIMUM_SELL_PRICE_MULTIPLIER = 99.7 / 100.0;
 
