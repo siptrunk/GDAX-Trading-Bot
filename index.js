@@ -2,13 +2,13 @@
  ============================================================================
  Name        : GDAX Trading Bot
  Author      : Kenshiro
- Version     : 4.04
+ Version     : 5.00
  Copyright   : GNU General Public License (GPLv3)
  Description : Trading bot for GDAX exchange
  ============================================================================
  */
 
-const APP_VERSION = "v4.04";
+const APP_VERSION = "v5.00";
 
 const GdaxModule = require('gdax');
 
@@ -18,55 +18,50 @@ const SECRET = process.env.TRADING_BOT_SECRET;
 
 const GDAX_URI = 'https://api.gdax.com';
 
-const CURRENCY_PAIR = 'BTC-EUR';
+const CURRENCY_PAIR = 'LTC-BTC';
 
-const EURO_TICKER = 'EUR';
 const BITCOIN_TICKER = 'BTC';
+const LITECOIN_TICKER = 'LTC';
 
 const SLEEP_TIME = 30000;
 
-// The seed is the amount of bitcoins that the program will trade continuously
-const SEED_BTC_AMOUNT = 0.03;
+// The seed is the amount of litecoins that the program will trade continuously
+const SEED_LTC_AMOUNT = 1.0;
 
 // Profit percentage trading a seed
-const PROFIT_PERCENTAGE = 0.25; 
+const PROFIT_PERCENTAGE = 0.4; 
 
-const MINIMUM_SELL_PRICE_MULTIPLIER = 99.7 / 100.0;
+const MINIMUM_BUY_PRICE_MULTIPLIER = 100.05 / 100.0;
 
-/* If the difference between the current price of bitcoin and the price of a
- * limit sell order reaches this amount, the limit sell order will be canceled */
-const CANCEL_SELL_ORDER_THRESHOLD = 0.01;
+const SELL_PRICE_MULTIPLIER = (100.0 + PROFIT_PERCENTAGE) / 100.0;
 
 let askPrice = null;
 let bidPrice = null;
 let averagePrice = null;
 
-let lastSellOrderPrice = null;
-
-let eurAvailable = 0;
-let eurBalance = 0;
+let lastBuyOrderPrice = null;
 
 let btcAvailable = 0;
 let btcBalance = 0;
 
+let ltcAvailable = 0;
+let ltcBalance = 0;
+
 let numberOfCyclesCompleted = 0;
 
 let estimatedProfit = 0;
-let lastFilledSize = 0;
 
 let authenticatedClient = null;
 let publicClient = null;
 
 // Callbacks
 
-const cancelOrderCallback = (error, response, data) => 
+const cancelBuyOrderCallback = (error, response, data) => 
 {
     if (error)
         return console.log(error);
 
-    lastSellOrderPrice = null;
-
-    estimatedProfit = estimatedProfit - lastFilledSize;
+    lastBuyOrderPrice = null;
 }
 
 const buyOrderCallback = (error, response, data) => 
@@ -76,11 +71,11 @@ const buyOrderCallback = (error, response, data) =>
 
     if ((data!=null) && (data.status==='pending'))
     {
-        estimatedProfit = estimatedProfit + parseFloat(data.size) - SEED_BTC_AMOUNT;
-        averagePrice = lastSellOrderPrice;        
-        lastSellOrderPrice = null;
-        numberOfCyclesCompleted++;
- 	}
+        const buyPrice = parseFloat(data.price);
+
+        if ((lastBuyOrderPrice===null) || (buyPrice>lastBuyOrderPrice))
+            lastBuyOrderPrice = buyPrice;
+    }
 
     return console.log(data);
 }
@@ -92,11 +87,11 @@ const sellOrderCallback = (error, response, data) =>
 
     if ((data!=null) && (data.status==='pending'))
     {
-        const sellPrice = parseFloat(data.price);
-
-        if ((lastSellOrderPrice===null) || (sellPrice<lastSellOrderPrice))
-            lastSellOrderPrice = sellPrice;
-    }
+        estimatedProfit = estimatedProfit + SEED_LTC_AMOUNT * (parseFloat(data.price) - lastBuyOrderPrice);
+        averagePrice = lastBuyOrderPrice;        
+        lastBuyOrderPrice = null;
+        numberOfCyclesCompleted++;
+ 	}
 
     return console.log(data);
 }
@@ -111,29 +106,27 @@ const getOrdersCallback = (error, response, data) =>
         for(let item of data)
         { 
             const orderPrice = parseFloat(item.price);
-            const priceDifference = parseInt(Math.abs(orderPrice - askPrice) * 100) / 100;
-      
-	        if ((item.product_id===CURRENCY_PAIR) && (item.side==='sell') && (priceDifference>=CANCEL_SELL_ORDER_THRESHOLD))
+            
+	        if ((item.product_id===CURRENCY_PAIR) && (item.side==='buy') && (orderPrice!=bidPrice))
             {
-	            console.log("\n[INFO] Canceling sell order (order price: " + orderPrice.toFixed(2) + " EUR)");
-                lastFilledSize = parseFloat(item.filled_size);
-		        authenticatedClient.cancelOrder(item.id, cancelOrderCallback);
+	            console.log("\n[INFO] Canceling buy order (order price: " + orderPrice.toFixed(5) + " BTC)");
+                authenticatedClient.cancelOrder(item.id, cancelBuyOrderCallback);
             }
         }
    
         console.log('');
 
-        const saleAmount = lastSellOrderPrice * SEED_BTC_AMOUNT - 0.01;
+        const buyPrice = bidPrice * SEED_LTC_AMOUNT - 0.00000001;
 
-        if ((btcAvailable>=SEED_BTC_AMOUNT) && (averagePrice!=null) && (lastSellOrderPrice===null))
-            placeSellOrder();
-        else if ((eurAvailable>=saleAmount) && (lastSellOrderPrice!=null))
+        if ((btcAvailable>=buyPrice) && (averagePrice!=null) && (lastBuyOrderPrice===null))
             placeBuyOrder();
+        else if ((ltcAvailable>=SEED_LTC_AMOUNT) && (lastBuyOrderPrice!=null))
+            placeSellOrder();
          
         if (averagePrice===null)
-            averagePrice = askPrice;
+            averagePrice = bidPrice;
         else
-            averagePrice = (averagePrice*10 + askPrice) / 11;
+            averagePrice = (averagePrice*10 + bidPrice) / 11;
     }
 }
 
@@ -148,9 +141,9 @@ const getProductTickerCallback = (error, response, data) =>
         bidPrice = parseFloat(data.bid);
 
         if (averagePrice===null)
-            console.log("[BITCOIN TICKER] Now: " + askPrice.toFixed(2) + " EUR, time: " + data.time);
+            console.log("[LITECOIN TICKER] Now: " + bidPrice.toFixed(5) + " BTC, time: " + data.time);
         else
-            console.log("[BITCOIN TICKER] Now: " + askPrice.toFixed(2) + " EUR, average: " + averagePrice.toFixed(2) + " EUR, time: " + data.time);
+            console.log("[LITECOIN TICKER] Now: " + bidPrice.toFixed(5) + " BTC, average: " + averagePrice.toFixed(5) + " BTC, time: " + data.time);
 
         console.log("\n[INFO] Number of cycles completed: " + numberOfCyclesCompleted + ", estimated profit: " + estimatedProfit.toFixed(8) + " BTC");
 
@@ -172,15 +165,15 @@ const getAccountsCallback = (error, response, data) =>
 		        btcAvailable = parseFloat(item.available);
                 btcBalance = parseFloat(item.balance);
             }
-            else if (item.currency===EURO_TICKER)
+            else if (item.currency===LITECOIN_TICKER)
             {
-	            eurAvailable = parseFloat(item.available);
-	            eurBalance = parseFloat(item.balance);
+	            ltcAvailable = parseFloat(item.available);
+	            ltcBalance = parseFloat(item.balance);
             }
         }
    
         console.log("[BITCOIN WALLET] Available: " + btcAvailable.toFixed(8) + " BTC, Balance: " + btcBalance.toFixed(8) + " BTC");
-        console.log("[EURO WALLET] Available: " + eurAvailable.toFixed(2) + " EUR, Balance: " + eurBalance.toFixed(2) + " EUR\n");
+        console.log("[LITECOIN WALLET] Available: " + ltcAvailable.toFixed(8) + " LTC, Balance: " + ltcBalance.toFixed(8) + " LTC\n");
 
         publicClient.getProductTicker(CURRENCY_PAIR, getProductTickerCallback);
     }
@@ -188,53 +181,51 @@ const getAccountsCallback = (error, response, data) =>
 
 // Functions
 
-function placeSellOrder() 
+function placeBuyOrder() 
 {
-    const minimumSellPrice = averagePrice * MINIMUM_SELL_PRICE_MULTIPLIER;
+    const minimumBuyPrice = averagePrice * MINIMUM_BUY_PRICE_MULTIPLIER;
 
-    if (askPrice<=minimumSellPrice)
+    if (bidPrice>=minimumBuyPrice)
     {
-        const sellPrice = askPrice;
-        const sellSize = SEED_BTC_AMOUNT;
+        const buyPrice = bidPrice;
+        const buySize = SEED_LTC_AMOUNT;
 
-        const sellParams = 
+        const buyParams = 
 	    {
-            'price': sellPrice.toFixed(2),
-            'size': sellSize.toFixed(8),
+            'price': buyPrice.toFixed(5),
+            'size': buySize.toFixed(4),
             'product_id': CURRENCY_PAIR,
             'post_only': true
 		};
 
-        console.log("\x1b[41m%s\x1b[0m", "[SELL ORDER] Price: " + sellPrice.toFixed(2) + " EUR, size: " + sellSize.toFixed(8) + " BTC");
+        console.log("\x1b[42m%s\x1b[0m", "[BUY ORDER] Price: " + buyPrice.toFixed(5) + " BTC, size: " + buySize.toFixed(4) + " LTC");
 
-        authenticatedClient.sell(sellParams, sellOrderCallback);
+        authenticatedClient.buy(buyParams, buyOrderCallback);
     }
 }
 
-function placeBuyOrder() 
+function placeSellOrder() 
 {
-    let buyPrice;
+    let sellPrice;
 
-    const priceMultiplier = (100.0 - PROFIT_PERCENTAGE) / 100.0;
-    
-    if (bidPrice<lastSellOrderPrice)
-        buyPrice = bidPrice * priceMultiplier;
+    if (askPrice>lastBuyOrderPrice)
+        sellPrice = askPrice * SELL_PRICE_MULTIPLIER;
     else
-        buyPrice = lastSellOrderPrice * priceMultiplier;
+        sellPrice = lastBuyOrderPrice * SELL_PRICE_MULTIPLIER;
 
-    const buySize = (eurAvailable - 0.01) / buyPrice;
+    const sellSize = ltcAvailable - 0.00000001;
 
-    const buyParams = 
+    const sellParams = 
     {
-        'price': buyPrice.toFixed(2),
-        'size': buySize.toFixed(8),
+        'price': sellPrice.toFixed(5),
+        'size': sellSize.toFixed(4),
         'product_id': CURRENCY_PAIR,
         'post_only': true,
     };
 
-    console.log("\x1b[42m%s\x1b[0m", "[BUY ORDER] Price: " + buyPrice.toFixed(2) + " EUR, size: " + buySize.toFixed(8) + " BTC"); 
+    console.log("\x1b[41m%s\x1b[0m", "[SELL ORDER] Price: " + sellPrice.toFixed(5) + " BTC, size: " + sellSize.toFixed(4) + " LTC"); 
 
-    authenticatedClient.buy(buyParams, buyOrderCallback);
+    authenticatedClient.sell(sellParams, sellOrderCallback);
 }
 
 // Main logic
@@ -266,8 +257,8 @@ setInterval(() =>
     btcAvailable = 0;
     btcBalance = 0;
 
-    eurAvailable = 0;
-    eurBalance = 0;
+    ltcAvailable = 0;
+    ltcBalance = 0;
 
     publicClient = new GdaxModule.PublicClient(GDAX_URI); 
     authenticatedClient = new GdaxModule.AuthenticatedClient(KEY, SECRET, PASSPHRASE, GDAX_URI);

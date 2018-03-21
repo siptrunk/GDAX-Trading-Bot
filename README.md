@@ -1,23 +1,23 @@
 # GDAX Trading Bot
 
-This program is an automated trading system that can autonomously trade the BTC / EUR pair in the GDAX exchange. 
+This program is an automated trading system that can autonomously trade the LTC / BTC pair in the GDAX exchange. 
 
 Keep in mind that trading is a risky activity that can involve a loss of money. You should only invest the amount you can afford to lose.
 
 ## Trading strategy
 
-The trading strategy consists of issuing a large number of low value orders. The program continuously monitors the price of bitcoin and issues a limit sell order when the price begins to fall below the weighted average of the previous prices. Once the sell order is filled, the program issues a limit buy order for a larger quantity of bitcoins at a cheaper price.
+The trading strategy consists of issuing a large number of low value orders. The program continuously monitors the price of litecoin and issues a limit buy order when the price begins to rise above the weighted average of the previous prices. Once the buy order is filled, the program issues a limit sell order at a higher price.
 
 ### The seed
 
-The seed is the amount of bitcoins that the program will trade continuously to earn more bitcoins. The greater the seed, the greater the benefit. The seed value must be set in the program variable SEED_BTC_AMOUNT.
+The seed is the amount of litecoins that the program will trade continuously to earn bitcoins. The greater the seed, the greater the benefit. The seed value must be set in the program variable SEED_LTC_AMOUNT.
 
-It is recommended that the seed does not exceed one thirtieth of the amount of bitcoins you can buy.
+It is recommended that the seed does not exceed one thirtieth of the amount of litecoins you can buy.
 
 Example:
 
-- If your current euro balance is 3000 euros and the bitcoin price is 10000 euros you can buy 0.3 btc
-- If you can buy 0.3 btc the recommended seed is 0.01 btc
+- If your current bitcoin balance is 0.3 btc and the litecoin price is 0.01 btc you can buy 30 litecoins
+- If you can buy 30 litecoins the recommended seed is 1 ltc
 
 ## Quick guide
 
@@ -50,7 +50,7 @@ Save the three values of the API key in the following environment variables of t
 ### Configuration
 
 - Open the file "index.js" with a text editor
-- Set the seed in the variable SEED_BTC_AMOUNT
+- Set the seed in the variable SEED_LTC_AMOUNT
 
 ### Execution
 
