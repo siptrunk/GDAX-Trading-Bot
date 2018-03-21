@@ -25,8 +25,7 @@ Example:
 
 - Register in Coinbase (https://www.coinbase.com)
 - Use the Coinbase account to login to the Gdax exchange (https://www.gdax.com)
-- Deposit the amount of euros you want with a SEPA transfer
-- Buy bitcoins using a limit order to avoid fees
+- Deposit the amount of bitcoins you want
 
 ### API Key generation
 
