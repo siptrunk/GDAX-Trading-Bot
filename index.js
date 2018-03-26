@@ -2,13 +2,13 @@
  ============================================================================
  Name        : GDAX Trading Bot
  Author      : Kenshiro
- Version     : 5.01
+ Version     : 5.02
  Copyright   : GNU General Public License (GPLv3)
  Description : Trading bot for GDAX exchange
  ============================================================================
  */
 
-const APP_VERSION = "v5.01";
+const APP_VERSION = "v5.02";
 
 const GdaxModule = require('gdax');
 
@@ -213,12 +213,12 @@ function placeSellOrder()
     else
         sellPrice = lastBuyOrderPrice * SELL_PRICE_MULTIPLIER;
 
-    const sellSize = ltcAvailable - 0.00001;
+    const sellSize = ltcAvailable - 0.000000001;
 
     const sellParams = 
     {
         'price': sellPrice.toFixed(5),
-        'size': sellSize.toFixed(4),
+        'size': sellSize.toFixed(8),
         'product_id': CURRENCY_PAIR,
         'post_only': true,
     };
