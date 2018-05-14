@@ -12,12 +12,12 @@ The trading strategy consists of issuing a large number of low value orders. The
 
 The seed is the amount of litecoins that the program will trade continuously to earn bitcoins. The greater the seed, the greater the benefit. The seed value must be set in the program variable SEED_LTC_AMOUNT.
 
-It is recommended that the seed does not exceed one thirtieth of the amount of litecoins you can buy.
+It is recommended that the seed does not exceed one hundredth of the amount of litecoins you can buy.
 
 Example:
 
-- If your current bitcoin balance is 0.3 btc and the litecoin price is 0.01 btc you can buy 30 litecoins
-- If you can buy 30 litecoins the recommended seed is 1 ltc
+- If your current bitcoin balance is 0.1 btc and the price of litecoin is 0.01 btc you can buy 10 litecoins
+- If you can buy 10 litecoins the recommended seed is 0.1 ltc
 
 ## Quick guide
 
