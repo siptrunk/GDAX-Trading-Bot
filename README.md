@@ -24,7 +24,7 @@ Example:
 ### Registration
 
 - Register in Coinbase (https://www.coinbase.com)
-- Use the Coinbase account to login to the Gdax exchange (https://www.gdax.com)
+- Use the Coinbase account to login to the GDAX exchange (https://www.gdax.com)
 - Deposit the amount of bitcoins you want
 
 ### API Key generation
