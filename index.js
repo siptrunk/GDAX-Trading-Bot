@@ -26,10 +26,10 @@ const LITECOIN_TICKER = 'LTC';
 const SLEEP_TIME = 30000;
 
 // The seed is the amount of litecoins that the program will trade continuously
-const SEED_LTC_AMOUNT = 1.0;
+const SEED_LTC_AMOUNT = 0.1;
 
 // Profit percentage trading a seed
-const PROFIT_PERCENTAGE = 0.4; 
+const PROFIT_PERCENTAGE = 0.5; 
 
 const MINIMUM_BUY_PRICE_MULTIPLIER = 100.05 / 100.0;
 
@@ -245,7 +245,7 @@ console.log("                              /_____/\\____/\\__/   " + APP_VERSION
 
 console.log("\n\n\n\n                    \"The Revolution Will Be Decentralized\"");
 
-console.log("\n\n\n\nConnecting to GDAX in " + parseInt(SLEEP_TIME/1000) + " seconds ..."); 
+console.log("\n\n\n\nConnecting to Coinbase Pro in " + parseInt(SLEEP_TIME/1000) + " seconds ..."); 
 
 setInterval(() => 
 {
