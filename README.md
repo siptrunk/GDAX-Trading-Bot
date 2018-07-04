@@ -1,6 +1,6 @@
 # GDAX Trading Bot
 
-This program is an automated trading system that can autonomously trade the LTC / BTC pair in the GDAX exchange. 
+This program is an automated trading system that can autonomously trade the LTC / BTC pair in the Coinbase Pro exchange. 
 
 Keep in mind that trading is a risky activity that can involve a loss of money. You should only invest the amount you can afford to lose.
 
@@ -24,12 +24,12 @@ Example:
 ### Registration
 
 - Register in Coinbase (https://www.coinbase.com)
-- Use the Coinbase account to login to the GDAX exchange (https://www.gdax.com)
+- Use the Coinbase account to login to the Coinbase Pro exchange (https://pro.coinbase.com)
 - Deposit the amount of bitcoins you want
 
 ### API Key generation
 
-Generate an API Key only with trade permission (https://www.gdax.com/settings/api)
+Generate an API Key only with trade permission (https://pro.coinbase.com/profile/api)
 
 ### Environment variables
 
