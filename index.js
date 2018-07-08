@@ -2,13 +2,13 @@
  ============================================================================
  Name        : GDAX Trading Bot
  Author      : Kenshiro
- Version     : 5.02
+ Version     : 5.03
  Copyright   : GNU General Public License (GPLv3)
- Description : Trading bot for GDAX exchange
+ Description : Trading bot for the Coinbase Pro exchange
  ============================================================================
  */
 
-const APP_VERSION = "v5.02";
+const APP_VERSION = "v5.03";
 
 const GdaxModule = require('gdax');
 
@@ -26,7 +26,7 @@ const LITECOIN_TICKER = 'LTC';
 const SLEEP_TIME = 30000;
 
 // The seed is the amount of litecoins that the program will trade continuously
-const SEED_LTC_AMOUNT = 0.1;
+const SEED_LTC_AMOUNT = 1.0;
 
 // Profit percentage trading a seed
 const PROFIT_PERCENTAGE = 0.5; 
@@ -126,7 +126,7 @@ const getOrdersCallback = (error, response, data) =>
         if (averagePrice===null)
             averagePrice = bidPrice;
         else
-            averagePrice = (averagePrice*10 + bidPrice) / 11;
+            averagePrice = (averagePrice * 30 + bidPrice) / 31;
     }
 }
 
