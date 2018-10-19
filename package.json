@@ -1,7 +1,7 @@
 {
   "name": "gdax-trading-bot",
   "version": "5.0.3",
-  "description": "Trading bot for GDAX exchange",
+  "description": "Trading bot for the Coinbase Pro exchange",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
