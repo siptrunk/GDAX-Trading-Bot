@@ -12,9 +12,9 @@ const APP_VERSION = "v5.03";
 
 const GdaxModule = require('gdax');
 
-const PASSPHRASE = process.env.TRADING_BOT_PASSPHRASE;
-const KEY = process.env.TRADING_BOT_KEY;
-const SECRET = process.env.TRADING_BOT_SECRET;
+const PASSPHRASE = process.env.TRADING_BOT_PASSPHRASE || '';
+const KEY = process.env.TRADING_BOT_KEY || '';
+const SECRET = process.env.TRADING_BOT_SECRET || '';
 
 const GDAX_URI = 'https://api.gdax.com';
 
@@ -126,7 +126,7 @@ const getOrdersCallback = (error, response, data) =>
         if (averagePrice===null)
             averagePrice = bidPrice;
         else
-            averagePrice = (averagePrice * 30 + bidPrice) / 31;
+            averagePrice = (averagePrice * 100 + bidPrice) / 101;
     }
 }
 
