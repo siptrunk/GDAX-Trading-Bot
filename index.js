@@ -29,9 +29,9 @@ const SLEEP_TIME = 30000;
 const SEED_LTC_AMOUNT = 1.0;
 
 // Profit percentage trading a seed
-const PROFIT_PERCENTAGE = 0.5; 
+const PROFIT_PERCENTAGE = 1.0; 
 
-const MINIMUM_BUY_PRICE_MULTIPLIER = 100.05 / 100.0;
+const MINIMUM_BUY_PRICE_MULTIPLIER = 100.1 / 100.0;
 
 const SELL_PRICE_MULTIPLIER = (100.0 + PROFIT_PERCENTAGE) / 100.0;
 
@@ -126,7 +126,7 @@ const getOrdersCallback = (error, response, data) =>
         if (averagePrice===null)
             averagePrice = bidPrice;
         else
-            averagePrice = (averagePrice * 100 + bidPrice) / 101;
+            averagePrice = (averagePrice * 1000 + bidPrice) / 1001;
     }
 }
 
