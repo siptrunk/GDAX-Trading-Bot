@@ -4,13 +4,13 @@
  ============================================================================
  Name        : GDAX Trading Bot
  Author      : Kenshiro
- Version     : 5.03
+ Version     : 5.04
  Copyright   : GNU General Public License (GPLv3)
  Description : Trading bot for the Coinbase Pro exchange
  ============================================================================
  */
 
-const APP_VERSION = "v5.03";
+const APP_VERSION = "v5.04";
 
 const GdaxModule = require('gdax');
 
@@ -111,7 +111,7 @@ const getOrdersCallback = (error, response, data) =>
             
 	        if ((item.product_id===CURRENCY_PAIR) && (item.side==='buy') && (orderPrice!=bidPrice))
             {
-	            console.log("\n[INFO] Canceling buy order (order price: " + orderPrice.toFixed(5) + " BTC)");
+	            console.log("\n[INFO] Canceling buy order (order price: " + orderPrice.toFixed(6) + " BTC)");
                 authenticatedClient.cancelOrder(item.id, cancelBuyOrderCallback);
             }
         }
@@ -143,9 +143,9 @@ const getProductTickerCallback = (error, response, data) =>
         bidPrice = parseFloat(data.bid);
 
         if (averagePrice===null)
-            console.log("[LITECOIN TICKER] Now: " + bidPrice.toFixed(5) + " BTC, time: " + data.time);
+            console.log("[LITECOIN TICKER] Now: " + bidPrice.toFixed(6) + " BTC, time: " + data.time);
         else
-            console.log("[LITECOIN TICKER] Now: " + bidPrice.toFixed(5) + " BTC, average: " + averagePrice.toFixed(5) + " BTC, time: " + data.time);
+            console.log("[LITECOIN TICKER] Now: " + bidPrice.toFixed(6) + " BTC, average: " + averagePrice.toFixed(6) + " BTC, time: " + data.time);
 
         console.log("\n[INFO] Number of cycles completed: " + numberOfCyclesCompleted + ", estimated profit: " + estimatedProfit.toFixed(8) + " BTC");
 
@@ -194,13 +194,13 @@ function placeBuyOrder()
 
         const buyParams = 
 	    {
-            'price': buyPrice.toFixed(5),
-            'size': buySize.toFixed(4),
+            'price': buyPrice.toFixed(6),
+            'size': buySize.toFixed(8),
             'product_id': CURRENCY_PAIR,
             'post_only': true
 		};
 
-        console.log("\x1b[42m%s\x1b[0m", "[BUY ORDER] Price: " + buyPrice.toFixed(5) + " BTC, size: " + buySize.toFixed(4) + " LTC");
+        console.log("\x1b[42m%s\x1b[0m", "[BUY ORDER] Price: " + buyPrice.toFixed(6) + " BTC, size: " + buySize.toFixed(8) + " LTC");
 
         authenticatedClient.buy(buyParams, buyOrderCallback);
     }
@@ -219,13 +219,13 @@ function placeSellOrder()
 
     const sellParams = 
     {
-        'price': sellPrice.toFixed(5),
+        'price': sellPrice.toFixed(6),
         'size': sellSize.toFixed(8),
         'product_id': CURRENCY_PAIR,
         'post_only': true,
     };
 
-    console.log("\x1b[41m%s\x1b[0m", "[SELL ORDER] Price: " + sellPrice.toFixed(5) + " BTC, size: " + sellSize.toFixed(4) + " LTC"); 
+    console.log("\x1b[41m%s\x1b[0m", "[SELL ORDER] Price: " + sellPrice.toFixed(6) + " BTC, size: " + sellSize.toFixed(8) + " LTC"); 
 
     authenticatedClient.sell(sellParams, sellOrderCallback);
 }
