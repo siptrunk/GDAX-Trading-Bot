@@ -18,7 +18,7 @@ const PASSPHRASE = process.env.TRADING_BOT_PASSPHRASE || '';
 const KEY = process.env.TRADING_BOT_KEY || '';
 const SECRET = process.env.TRADING_BOT_SECRET || '';
 
-const GDAX_URI = 'https://api.gdax.com';
+const GDAX_URI = 'https://api.pro.coinbase.com';
 
 const CURRENCY_PAIR = 'LTC-BTC';
 
