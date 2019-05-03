@@ -59,6 +59,6 @@ Save the three values of the API key in the following environment variables of t
 
 ## Donations
 
-Please consider making a donation to the following bitcoin address (BTC):
+Please consider making a donation to the following Bitcoin Confidential address (BC):
 
-1KNcZ1z3yuEK1hF27y53MyjJSZsPUYz3Ty
+B9uvrhBcSTfxjs3NjpyBvRwFHMLCQPUSmJFi1ocuGWneBFdaEDfGvSu8AHJPr2fReuPYh4HUWMe1W3DLu4Y5XEPRGABiAXeDTrx1Aj
