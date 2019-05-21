@@ -61,4 +61,4 @@ Save the three values of the API key in the following environment variables of t
 
 Please consider making a donation to the following Bitcoin Confidential address (BC):
 
-B9uvrhBcSTfxjs3NjpyBvRwFHMLCQPUSmJFi1ocuGWneBFdaEDfGvSu8AHJPr2fReuPYh4HUWMe1W3DLu4Y5XEPRGABiAXeDTrx1Aj
+B9uuWVj83v75AHNpDnmwxPFSoGooKwZiS2zL9bRQirBT7WWQaa6LfkuwbP8K9Z15xTrySeFbTzo2FdJVse9xexH9tTN25bpWvw4kDE
