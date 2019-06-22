@@ -74,8 +74,6 @@ const cancelBuyOrderCallbackLTC = (error, response, data) =>
         return console.log(error);
 
     lastBuyOrderPriceLTC = null;
-
-	console.log("\n");
 }
 
 const cancelBuyOrderCallbackETH = (error, response, data) => 
@@ -84,8 +82,6 @@ const cancelBuyOrderCallbackETH = (error, response, data) =>
         return console.log(error);
 
     lastBuyOrderPriceETH = null;
-
-	console.log("\n");
 }
 
 const buyOrderCallbackLTC = (error, response, data) => 
@@ -100,8 +96,6 @@ const buyOrderCallbackLTC = (error, response, data) =>
         if ((lastBuyOrderPriceLTC===null) || (buyPrice>lastBuyOrderPriceLTC))
             lastBuyOrderPriceLTC = buyPrice;
     }
-
-	console.log("\n");
 
     return console.log(data);
 }
@@ -118,8 +112,6 @@ const buyOrderCallbackETH = (error, response, data) =>
         if ((lastBuyOrderPriceETH===null) || (buyPrice>lastBuyOrderPriceETH))
             lastBuyOrderPriceETH = buyPrice;
     }
-
-	console.log("\n");
 
     return console.log(data);
 }
@@ -138,8 +130,6 @@ const sellOrderCallbackLTC = (error, response, data) =>
         numberOfCyclesCompleted++;
  	}
 
-	console.log("\n");
-
     return console.log(data);
 }
 
@@ -155,8 +145,6 @@ const sellOrderCallbackETH = (error, response, data) =>
         lastBuyOrderPriceETH = null;
         numberOfCyclesCompleted++;
  	}
-
-	console.log("\n");
 
     return console.log(data);
 }
@@ -214,9 +202,9 @@ const getOrdersCallbackETH = (error, response, data) =>
         const buyPrice = bidPriceETH * SEED_ETH_AMOUNT;
 
         if ((btcAvailable>=buyPrice) && (averagePriceETH!=null) && (lastBuyOrderPriceETH===null))
-            placeBuyOrderETH();
+            setTimeout(()=>placeBuyOrderETH(), 5000);
         else if ((ethAvailable>=SEED_ETH_AMOUNT) && (lastBuyOrderPriceETH!=null))
-            placeSellOrderETH();
+            setTimeout(()=>placeSellOrderETH(), 5000);
          
         if (averagePriceETH===null)
             averagePriceETH = bidPriceETH;
@@ -295,9 +283,9 @@ const getAccountsCallback = (error, response, data) =>
 
         publicClient.getProductTicker(LTC_BTC_CURRENCY_PAIR, getProductTickerCallbackLTC);
 		
-		setTimeout(()=>publicClient.getProductTicker(ETH_BTC_CURRENCY_PAIR, getProductTickerCallbackETH), 5000);
+		publicClient.getProductTicker(ETH_BTC_CURRENCY_PAIR, getProductTickerCallbackETH);
 
-		setTimeout(()=>console.log("\n[INFO] Number of cycles completed: " + numberOfCyclesCompleted + ", estimated profit: " + estimatedProfit.toFixed(8) + " BTC"), 15000);
+		console.log("\n[INFO] Number of cycles completed: " + numberOfCyclesCompleted + ", estimated profit: " + estimatedProfit.toFixed(8) + " BTC");
     }
 }
 
@@ -320,6 +308,7 @@ function placeBuyOrderLTC()
             'post_only': true
 		};
 
+		console.log("\n");
 		console.log("\x1b[42m%s\x1b[0m", "[BUY ORDER] Price: " + buyPrice.toFixed(6) + " BTC, size: " + buySize.toFixed(8) + " LTC");
 
         authenticatedClient.buy(buyParams, buyOrderCallbackLTC);
@@ -343,6 +332,7 @@ function placeBuyOrderETH()
             'post_only': true
 		};
 
+		console.log("\n");
 		console.log("\x1b[42m%s\x1b[0m", "[BUY ORDER] Price: " + buyPrice.toFixed(6) + " BTC, size: " + buySize.toFixed(8) + " ETH");
 
         authenticatedClient.buy(buyParams, buyOrderCallbackETH);
@@ -368,6 +358,7 @@ function placeSellOrderLTC()
         'post_only': true,
     };
 
+	console.log("\n");
 	console.log("\x1b[41m%s\x1b[0m", "[SELL ORDER] Price: " + sellPrice.toFixed(6) + " BTC, size: " + sellSize.toFixed(8) + " LTC"); 
 
     authenticatedClient.sell(sellParams, sellOrderCallbackLTC);
@@ -392,6 +383,7 @@ function placeSellOrderETH()
         'post_only': true,
     };
 
+	console.log("\n");
 	console.log("\x1b[41m%s\x1b[0m", "[SELL ORDER] Price: " + sellPrice.toFixed(5) + " BTC, size: " + sellSize.toFixed(8) + " ETH"); 
 
     authenticatedClient.sell(sellParams, sellOrderCallbackETH);
