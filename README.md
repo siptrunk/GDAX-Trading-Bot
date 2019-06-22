@@ -6,19 +6,19 @@ Keep in mind that trading is a risky activity that can involve a loss of money. 
 
 ## Trading strategy
 
-The trading strategy consists of issuing a large number of low value orders. The program continuously monitors the price of the trading pairs and issues a limit buy order when the price begins to rise above the weighted average of the previous prices. Once the buy order is filled, the program issues a limit sell order at a higher price.
+The trading strategy consists of issuing a large number of low value orders. The program continuously monitors the price of the coins and issues a limit buy order when the price begins to rise above the weighted average of the previous prices. Once the buy order is filled, the program issues a limit sell order at a higher price.
 
 ### The seed
 
 The seed is the amount of each coin that the program will trade continuously to earn bitcoins. The greater the seed, the greater the benefit. The seed values must be set in the program variables SEED_LTC_AMOUNT and SEED_ETH_AMOUNT.
 
-It is recommended that the seed does not exceed one tenth of the amount of coins that can be purchased from each trading pair.
+You should be able to buy at least 10 seeds of each coin with your initial bitcoin balance. The more seeds you can buy, the easier it will be to recover from a losing streak.
 
 Example:
 
 - Your seeds are set as 1 ltc and 1 eth (default settings) 
 - The price of litecoin is 0.01 btc and the price of ethereum is 0.02 btc
-- You should be able to buy 10 seeds of each coin with your current bitcoin balance
+- You should be able to buy 10 seeds of each coin with your initial bitcoin balance
 - Your minimum bitcoin balance should be: (0.01 + 0.02) * 10 = 0.3 btc
 
 ## Quick guide
