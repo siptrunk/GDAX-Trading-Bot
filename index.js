@@ -162,7 +162,7 @@ const getOrdersCallbackLTC = (error, response, data) =>
             
 	        if ((item.product_id===LTC_BTC_CURRENCY_PAIR) && (item.side==='buy') && (orderPrice!=bidPriceLTC))
             {
-	            console.log("\n[INFO] Canceling Litecoin buy order (order price: " + orderPrice.toFixed(6) + " BTC)");
+	            console.log("\n[INFO] Canceling Litecoin buy order (order price: " + orderPrice.toFixed(6) + " BTC)\n");
                 authenticatedClient.cancelOrder(item.id, cancelBuyOrderCallbackLTC);
             }
 		}
@@ -170,14 +170,16 @@ const getOrdersCallbackLTC = (error, response, data) =>
         const buyPrice = bidPriceLTC * SEED_LTC_AMOUNT;
 
         if ((btcAvailable>=buyPrice) && (averagePriceLTC!=null) && (lastBuyOrderPriceLTC===null))
-            placeBuyOrderLTC();
+            setTimeout(()=>placeBuyOrderLTC(), 5000);
         else if ((ltcAvailable>=SEED_LTC_AMOUNT) && (lastBuyOrderPriceLTC!=null))
-            placeSellOrderLTC();
+            setTimeout(()=>placeSellOrderLTC(), 5000);
          
         if (averagePriceLTC===null)
             averagePriceLTC = bidPriceLTC;
         else
             averagePriceLTC = (averagePriceLTC * 1000 + bidPriceLTC) / 1001;
+	
+		setTimeout(()=>publicClient.getProductTicker(ETH_BTC_CURRENCY_PAIR, getProductTickerCallbackETH), 2000);
 	}
 }
 
@@ -228,7 +230,7 @@ const getProductTickerCallbackLTC = (error, response, data) =>
         else
             console.log("[LITECOIN TICKER] Now: " + bidPriceLTC.toFixed(6) + " BTC, average: " + averagePriceLTC.toFixed(6) + " BTC, time: " + data.time);
 
-        authenticatedClient.getOrders(getOrdersCallbackLTC);
+		authenticatedClient.getOrders(getOrdersCallbackLTC);
     }
 }
 
@@ -246,8 +248,10 @@ const getProductTickerCallbackETH= (error, response, data) =>
             console.log("[ETHEREUM TICKER] Now: " + bidPriceETH.toFixed(6) + " BTC, time: " + data.time);
         else
             console.log("[ETHEREUM TICKER] Now: " + bidPriceETH.toFixed(6) + " BTC, average: " + averagePriceETH.toFixed(6) + " BTC, time: " + data.time);
+		
+		console.log("\n[INFO] Number of cycles completed: " + numberOfCyclesCompleted + ", estimated profit: " + estimatedProfit.toFixed(8) + " BTC");
 
-        authenticatedClient.getOrders(getOrdersCallbackETH);
+		authenticatedClient.getOrders(getOrdersCallbackETH);
     }
 }
 
@@ -282,10 +286,6 @@ const getAccountsCallback = (error, response, data) =>
 		console.log("[ETHEREUM WALLET] Available: " + ethAvailable.toFixed(8) + " ETH, Balance: " + ethBalance.toFixed(8) + " ETH\n");
 
         publicClient.getProductTicker(LTC_BTC_CURRENCY_PAIR, getProductTickerCallbackLTC);
-		
-		publicClient.getProductTicker(ETH_BTC_CURRENCY_PAIR, getProductTickerCallbackETH);
-
-		console.log("\n[INFO] Number of cycles completed: " + numberOfCyclesCompleted + ", estimated profit: " + estimatedProfit.toFixed(8) + " BTC");
     }
 }
 
@@ -308,7 +308,7 @@ function placeBuyOrderLTC()
             'post_only': true
 		};
 
-		console.log("\n");
+		console.log("");
 		console.log("\x1b[42m%s\x1b[0m", "[BUY ORDER] Price: " + buyPrice.toFixed(6) + " BTC, size: " + buySize.toFixed(8) + " LTC");
 
         authenticatedClient.buy(buyParams, buyOrderCallbackLTC);
@@ -332,7 +332,7 @@ function placeBuyOrderETH()
             'post_only': true
 		};
 
-		console.log("\n");
+		console.log("");
 		console.log("\x1b[42m%s\x1b[0m", "[BUY ORDER] Price: " + buyPrice.toFixed(6) + " BTC, size: " + buySize.toFixed(8) + " ETH");
 
         authenticatedClient.buy(buyParams, buyOrderCallbackETH);
@@ -358,7 +358,7 @@ function placeSellOrderLTC()
         'post_only': true,
     };
 
-	console.log("\n");
+	console.log("");
 	console.log("\x1b[41m%s\x1b[0m", "[SELL ORDER] Price: " + sellPrice.toFixed(6) + " BTC, size: " + sellSize.toFixed(8) + " LTC"); 
 
     authenticatedClient.sell(sellParams, sellOrderCallbackLTC);
@@ -383,7 +383,7 @@ function placeSellOrderETH()
         'post_only': true,
     };
 
-	console.log("\n");
+	console.log("");
 	console.log("\x1b[41m%s\x1b[0m", "[SELL ORDER] Price: " + sellPrice.toFixed(5) + " BTC, size: " + sellSize.toFixed(8) + " ETH"); 
 
     authenticatedClient.sell(sellParams, sellOrderCallbackETH);
