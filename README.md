@@ -1,12 +1,12 @@
 # GDAX Trading Bot
 
-This program is an automated trading system that can autonomously trade the LTC-BTC and ETH-BTC pairs in the Coinbase Pro exchange. 
+This program is an automated trading system that can autonomously trade the LTC / BTC and ETH / BTC pairs in the Coinbase Pro exchange. 
 
 Keep in mind that trading is a risky activity that can involve a loss of money. You should only invest the amount you can afford to lose.
 
 ## Trading strategy
 
-The trading strategy consists of issuing a large number of low value orders. The program continuously monitors the price of the coins and issues a limit buy order when the price begins to rise above the weighted average of the previous prices. Once the buy order is filled, the program issues a limit sell order at a higher price.
+The trading strategy consists of issuing a large number of low value orders. The program continuously monitors the price of each coin and issues a market buy order when the price begins to rise above the weighted average of the previous prices. Once the buy order is filled, the program issues a limit sell order at a higher price.
 
 ### The seed
 
