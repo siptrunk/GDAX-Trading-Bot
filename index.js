@@ -41,12 +41,10 @@ const MINIMUM_BUY_PRICE_MULTIPLIER = 100.3 / 100.0;
 const SELL_PRICE_MULTIPLIER = (100.0 + PROFIT_PERCENTAGE) / 100.0;
 
 let askPriceLTC = null;
-let bidPriceLTC = null;
 let averagePriceLTC = null;
 let lastBuyOrderPriceLTC = null;
 
 let askPriceETH = null;
-let bidPriceETH = null;
 let averagePriceETH = null;
 let lastBuyOrderPriceETH = null;
 
@@ -87,15 +85,13 @@ const cancelBuyOrderCallbackETH = (error, response, data) =>
 const buyOrderCallbackLTC = (error, response, data) => 
 {
     if (error)
+	{
+		lastBuyOrderPriceLTC = null;
         return console.log(error);
+	}
 
-    if ((data!=null) && (data.status==='pending'))
-    {
-        const buyPrice = parseFloat(data.price);
-
-        if ((lastBuyOrderPriceLTC===null) || (buyPrice>lastBuyOrderPriceLTC))
-            lastBuyOrderPriceLTC = buyPrice;
-    }
+    if ((data==null) || (data.status!=='pending'))
+        lastBuyOrderPriceLTC = null;
 
     return console.log(data);
 }
@@ -103,15 +99,13 @@ const buyOrderCallbackLTC = (error, response, data) =>
 const buyOrderCallbackETH = (error, response, data) => 
 {
     if (error)
+	{
+		lastBuyOrderPriceETH = null;
         return console.log(error);
+	}
 
-    if ((data!=null) && (data.status==='pending'))
-    {
-        const buyPrice = parseFloat(data.price);
-
-        if ((lastBuyOrderPriceETH===null) || (buyPrice>lastBuyOrderPriceETH))
-            lastBuyOrderPriceETH = buyPrice;
-    }
+    if ((data==null) || (data.status!=='pending'))
+        lastBuyOrderPriceETH = null;
 
     return console.log(data);
 }
@@ -149,25 +143,21 @@ const sellOrderCallbackETH = (error, response, data) =>
     return console.log(data);
 }
 
-const getOrdersCallbackLTC = (error, response, data) => 
+const getProductTickerCallbackLTC = (error, response, data) => 
 {
-    if (error)
+	if (error)
         return console.log(error);
 
-    if ((data!=null) && (Symbol.iterator in Object(data)))
+    if ((data!=null) && (data.ask!=null) && (data.time!=null))
     {
-        for(let item of data)
-        { 
-            const orderPrice = parseFloat(item.price);
-            
-	        if ((item.product_id===LTC_BTC_CURRENCY_PAIR) && (item.side==='buy') && (orderPrice!=bidPriceLTC))
-            {
-	            console.log("\n[INFO] Canceling Litecoin buy order (order price: " + orderPrice.toFixed(6) + " BTC)\n");
-                authenticatedClient.cancelOrder(item.id, cancelBuyOrderCallbackLTC);
-            }
-		}
-   
-        const buyPrice = bidPriceLTC * SEED_LTC_AMOUNT;
+	    askPriceLTC = parseFloat(data.ask);
+        
+        if (averagePriceLTC===null)
+            console.log("[LITECOIN TICKER] Now: " + askPriceLTC.toFixed(6) + " BTC, time: " + data.time);
+        else
+            console.log("[LITECOIN TICKER] Now: " + askPriceLTC.toFixed(6) + " BTC, average: " + averagePriceLTC.toFixed(6) + " BTC, time: " + data.time);
+
+		const buyPrice = askPriceLTC * SEED_LTC_AMOUNT;
 
         if ((btcAvailable>=buyPrice) && (averagePriceLTC!=null) && (lastBuyOrderPriceLTC===null))
             setTimeout(()=>placeBuyOrderLTC(), 5000);
@@ -175,62 +165,11 @@ const getOrdersCallbackLTC = (error, response, data) =>
             setTimeout(()=>placeSellOrderLTC(), 5000);
          
         if (averagePriceLTC===null)
-            averagePriceLTC = bidPriceLTC;
+            averagePriceLTC = askPriceLTC;
         else
-            averagePriceLTC = (averagePriceLTC * 1000 + bidPriceLTC) / 1001;
+            averagePriceLTC = (averagePriceLTC * 1000 + askPriceLTC) / 1001;
 	
 		setTimeout(()=>publicClient.getProductTicker(ETH_BTC_CURRENCY_PAIR, getProductTickerCallbackETH), 2000);
-	}
-}
-
-const getOrdersCallbackETH = (error, response, data) => 
-{
-    if (error)
-        return console.log(error);
-
-    if ((data!=null) && (Symbol.iterator in Object(data)))
-    {
-        for(let item of data)
-        { 
-            const orderPrice = parseFloat(item.price);
-            
-	        if ((item.product_id===ETH_BTC_CURRENCY_PAIR) && (item.side==='buy') && (orderPrice!=bidPriceETH))
-            {
-	            console.log("\n[INFO] Canceling Ethereum buy order (order price: " + orderPrice.toFixed(6) + " BTC)");
-                authenticatedClient.cancelOrder(item.id, cancelBuyOrderCallbackETH);
-            }
-        }
-   
-        const buyPrice = bidPriceETH * SEED_ETH_AMOUNT;
-
-        if ((btcAvailable>=buyPrice) && (averagePriceETH!=null) && (lastBuyOrderPriceETH===null))
-            setTimeout(()=>placeBuyOrderETH(), 5000);
-        else if ((ethAvailable>=SEED_ETH_AMOUNT) && (lastBuyOrderPriceETH!=null))
-            setTimeout(()=>placeSellOrderETH(), 5000);
-         
-        if (averagePriceETH===null)
-            averagePriceETH = bidPriceETH;
-        else
-            averagePriceETH = (averagePriceETH * 1000 + bidPriceETH) / 1001;
-	}
-}
-
-const getProductTickerCallbackLTC = (error, response, data) => 
-{
-	if (error)
-        return console.log(error);
-
-    if (data!=null)
-    {
-	    askPriceLTC = parseFloat(data.ask);
-        bidPriceLTC = parseFloat(data.bid);
-
-        if (averagePriceLTC===null)
-            console.log("[LITECOIN TICKER] Now: " + bidPriceLTC.toFixed(6) + " BTC, time: " + data.time);
-        else
-            console.log("[LITECOIN TICKER] Now: " + bidPriceLTC.toFixed(6) + " BTC, average: " + averagePriceLTC.toFixed(6) + " BTC, time: " + data.time);
-
-		authenticatedClient.getOrders(getOrdersCallbackLTC);
     }
 }
 
@@ -239,19 +178,28 @@ const getProductTickerCallbackETH= (error, response, data) =>
 	if (error)
         return console.log(error);
 
-    if (data!=null)
+    if ((data!=null) && (data.ask!=null) && (data.time!=null))
     {
 	    askPriceETH = parseFloat(data.ask);
-        bidPriceETH = parseFloat(data.bid);
-
+       
         if (averagePriceETH==null)
-            console.log("[ETHEREUM TICKER] Now: " + bidPriceETH.toFixed(6) + " BTC, time: " + data.time);
+            console.log("[ETHEREUM TICKER] Now: " + askPriceETH.toFixed(6) + " BTC, time: " + data.time);
         else
-            console.log("[ETHEREUM TICKER] Now: " + bidPriceETH.toFixed(6) + " BTC, average: " + averagePriceETH.toFixed(6) + " BTC, time: " + data.time);
+            console.log("[ETHEREUM TICKER] Now: " + askPriceETH.toFixed(6) + " BTC, average: " + averagePriceETH.toFixed(6) + " BTC, time: " + data.time);
 		
 		console.log("\n[INFO] Number of cycles completed: " + numberOfCyclesCompleted + ", estimated profit: " + estimatedProfit.toFixed(8) + " BTC");
 
-		authenticatedClient.getOrders(getOrdersCallbackETH);
+		const buyPrice = askPriceETH * SEED_ETH_AMOUNT;
+
+        if ((btcAvailable>=buyPrice) && (averagePriceETH!=null) && (lastBuyOrderPriceETH===null))
+            setTimeout(()=>placeBuyOrderETH(), 5000);
+        else if ((ethAvailable>=SEED_ETH_AMOUNT) && (lastBuyOrderPriceETH!=null))
+            setTimeout(()=>placeSellOrderETH(), 5000);
+         
+        if (averagePriceETH===null)
+            averagePriceETH = askPriceETH;
+        else
+            averagePriceETH = (averagePriceETH * 1000 + askPriceETH) / 1001;
     }
 }
 
@@ -295,21 +243,22 @@ function placeBuyOrderLTC()
 {
     const minimumBuyPrice = averagePriceLTC * MINIMUM_BUY_PRICE_MULTIPLIER;
 
-    if (bidPriceLTC>=minimumBuyPrice)
+    if (askPriceLTC>=minimumBuyPrice)
     {
-        const buyPrice = bidPriceLTC;
+        const buyPrice = askPriceLTC;
         const buySize = SEED_LTC_AMOUNT;
 
         const buyParams = 
 	    {
-            'price': buyPrice.toFixed(6),
             'size': buySize.toFixed(8),
             'product_id': LTC_BTC_CURRENCY_PAIR,
-            'post_only': true
+            'type': 'market'
 		};
 
 		console.log("");
 		console.log("\x1b[42m%s\x1b[0m", "[BUY ORDER] Price: " + buyPrice.toFixed(6) + " BTC, size: " + buySize.toFixed(8) + " LTC");
+
+		lastBuyOrderPriceLTC = buyPrice;
 
         authenticatedClient.buy(buyParams, buyOrderCallbackLTC);
     }
@@ -319,21 +268,22 @@ function placeBuyOrderETH()
 {
     const minimumBuyPrice = averagePriceETH * MINIMUM_BUY_PRICE_MULTIPLIER;
 
-    if (bidPriceETH>=minimumBuyPrice)
+    if (askPriceETH>=minimumBuyPrice)
     {
-        const buyPrice = bidPriceETH;
+        const buyPrice = askPriceETH;
         const buySize = SEED_ETH_AMOUNT;
 
         const buyParams = 
 	    {
-            'price': buyPrice.toFixed(6),
             'size': buySize.toFixed(8),
             'product_id': ETH_BTC_CURRENCY_PAIR,
-            'post_only': true
+            'type': 'market'
 		};
 
 		console.log("");
 		console.log("\x1b[42m%s\x1b[0m", "[BUY ORDER] Price: " + buyPrice.toFixed(6) + " BTC, size: " + buySize.toFixed(8) + " ETH");
+
+		lastBuyOrderPriceETH = buyPrice;
 
         authenticatedClient.buy(buyParams, buyOrderCallbackETH);
     }
@@ -413,11 +363,8 @@ setInterval(() =>
     console.log('\n\n');
 
     askPriceLTC = null;
-    bidPriceLTC = null;
-
 	askPriceETH = null;
-    bidPriceETH = null;
-
+    
     btcAvailable = 0;
     btcBalance = 0;
 
