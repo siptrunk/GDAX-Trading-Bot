@@ -66,22 +66,6 @@ let publicClient = null;
 
 // Callbacks
 
-const cancelBuyOrderCallbackLTC = (error, response, data) => 
-{
-    if (error)
-        return console.log(error);
-
-    lastBuyOrderPriceLTC = null;
-}
-
-const cancelBuyOrderCallbackETH = (error, response, data) => 
-{
-    if (error)
-        return console.log(error);
-
-    lastBuyOrderPriceETH = null;
-}
-
 const buyOrderCallbackLTC = (error, response, data) => 
 {
     if (error)
