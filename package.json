@@ -9,7 +9,7 @@
   "author": "Kenshiro",
   "license": "GPL-3.0",
   "dependencies": {
-    "gdax": "^0.5.1"
+    "coinbase-pro": "^0.9.0"
   },
   "repository": {
     "type": "git",

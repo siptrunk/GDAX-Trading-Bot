@@ -12,7 +12,7 @@
 
 const APP_VERSION = "v7.00";
 
-const GdaxModule = require('gdax');
+const GdaxModule = require('coinbase-pro');
 
 const PASSPHRASE = process.env.TRADING_BOT_PASSPHRASE || '';
 const KEY = process.env.TRADING_BOT_KEY || '';
