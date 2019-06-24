@@ -318,7 +318,7 @@ function placeSellOrderETH()
     };
 
 	console.log("");
-	console.log("\x1b[41m%s\x1b[0m", "[SELL ORDER] Price: " + sellPrice.toFixed(5) + " BTC, size: " + sellSize.toFixed(8) + " ETH"); 
+	console.log("\x1b[41m%s\x1b[0m", "[SELL ORDER] Price: " + sellPrice.toFixed(6) + " BTC, size: " + sellSize.toFixed(8) + " ETH"); 
 
     authenticatedClient.sell(sellParams, sellOrderCallbackETH);
 }
