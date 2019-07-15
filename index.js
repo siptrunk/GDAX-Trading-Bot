@@ -224,7 +224,7 @@ const getFilledPriceCallbackLTC = (error, response, data) =>
 	if (error)
         return console.log(error);
 
-	if ((data!=null) && (Symbol.iterator in Object(data)))
+	if ((Array.isArray(data)) && (data.length >= 1))
 	{
 		lastBuyOrderPriceLTC = parseFloat(data[0].price);
 
@@ -261,7 +261,7 @@ const getFilledPriceCallbackETH = (error, response, data) =>
 	if (error)
         return console.log(error);
 
-	if ((data!=null) && (Symbol.iterator in Object(data)))
+	if ((Array.isArray(data)) && (data.length >= 1))
 	{
 		lastBuyOrderPriceETH = parseFloat(data[0].price);
 
