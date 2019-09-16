@@ -4,13 +4,13 @@
  ============================================================================
  Name        : GDAX Trading Bot
  Author      : Kenshiro
- Version     : 7.03
+ Version     : 7.04
  Copyright   : GNU General Public License (GPLv3)
  Description : Trading bot for the Coinbase Pro exchange
  ============================================================================
  */
 
-const APP_VERSION = "v7.03";
+const APP_VERSION = "v7.04";
 
 const GdaxModule = require('coinbase-pro');
 
@@ -20,17 +20,17 @@ const SECRET = process.env.TRADING_BOT_SECRET || '';
 
 const GDAX_URI = 'https://api.pro.coinbase.com';
 
-const LTC_BTC_CURRENCY_PAIR = 'LTC-BTC';
+const DASH_BTC_CURRENCY_PAIR = 'DASH-BTC';
 const ETH_BTC_CURRENCY_PAIR = 'ETH-BTC';
 
 const BITCOIN_TICKER = 'BTC';
-const LITECOIN_TICKER = 'LTC';
+const DASH_TICKER = 'DASH';
 const ETHEREUM_TICKER = 'ETH';
 
 const SLEEP_TIME = 30000;
 
 // The seed is the amount of coins that the program will trade continuously
-const SEED_LTC_AMOUNT = 1.0;
+const SEED_DASH_AMOUNT = 1.0;
 const SEED_ETH_AMOUNT = 1.0;
 
 // Profit percentage trading a seed
@@ -40,10 +40,10 @@ const MINIMUM_BUY_PRICE_MULTIPLIER = 100.5 / 100.0;
 
 const SELL_PRICE_MULTIPLIER = (100.0 + PROFIT_PERCENTAGE) / 100.0;
 
-let askPriceLTC = null;
-let averagePriceLTC = null;
-let lastBuyOrderIdLTC = null;
-let lastBuyOrderPriceLTC = null;
+let askPriceDASH = null;
+let averagePriceDASH = null;
+let lastBuyOrderIdDASH = null;
+let lastBuyOrderPriceDASH = null;
 
 let askPriceETH = null;
 let averagePriceETH = null;
@@ -53,8 +53,8 @@ let lastBuyOrderPriceETH = null;
 let btcAvailable = 0;
 let btcBalance = 0;
 
-let ltcAvailable = 0;
-let ltcBalance = 0;
+let dashAvailable = 0;
+let dashBalance = 0;
 
 let ethAvailable = 0;
 let ethBalance = 0;
@@ -68,13 +68,13 @@ let publicClient = null;
 
 // Callbacks
 
-const buyOrderCallbackLTC = (error, response, data) => 
+const buyOrderCallbackDASH = (error, response, data) => 
 {
     if (error)
         return console.log(error);
 
     if ((data!=null) && (data.status==='pending'))
-		lastBuyOrderIdLTC = data.id;
+		lastBuyOrderIdDASH = data.id;
 
     return console.log(data);
 }
@@ -91,17 +91,17 @@ const buyOrderCallbackETH = (error, response, data) =>
 }
 
 
-const sellOrderCallbackLTC = (error, response, data) => 
+const sellOrderCallbackDASH = (error, response, data) => 
 {
     if (error)
         return console.log(error);
 
     if ((data!=null) && (data.status==='pending'))
     {
-        estimatedProfit = estimatedProfit + SEED_LTC_AMOUNT * (parseFloat(data.price) - lastBuyOrderPriceLTC);
-		averagePriceLTC = lastBuyOrderPriceLTC;          
-		lastBuyOrderPriceLTC = null;
-		lastBuyOrderIdLTC = null;
+        estimatedProfit = estimatedProfit + SEED_DASH_AMOUNT * (parseFloat(data.price) - lastBuyOrderPriceDASH);
+		averagePriceDASH = lastBuyOrderPriceDASH;          
+		lastBuyOrderPriceDASH = null;
+		lastBuyOrderIdDASH = null;
         numberOfCyclesCompleted++;
  	}
 
@@ -125,31 +125,31 @@ const sellOrderCallbackETH = (error, response, data) =>
     return console.log(data);
 }
 
-const getProductTickerCallbackLTC = (error, response, data) => 
+const getProductTickerCallbackDASH = (error, response, data) => 
 {
 	if (error)
         return console.log(error);
 
     if ((data!=null) && (data.ask!=null) && (data.time!=null))
     {
-	    askPriceLTC = parseFloat(data.ask);
+	    askPriceDASH = parseFloat(data.ask);
         
-        if (averagePriceLTC===null)
-            console.log("[LITECOIN TICKER] Now: " + askPriceLTC.toFixed(6) + " BTC, time: " + data.time);
+        if (averagePriceDASH===null)
+            console.log("[DASH     TICKER] Now: " + askPriceDASH.toFixed(6) + " BTC, time: " + data.time);
         else
-            console.log("[LITECOIN TICKER] Now: " + askPriceLTC.toFixed(6) + " BTC, average: " + averagePriceLTC.toFixed(6) + " BTC, time: " + data.time);
+            console.log("[DASH     TICKER] Now: " + askPriceDASH.toFixed(6) + " BTC, average: " + averagePriceDASH.toFixed(6) + " BTC, time: " + data.time);
 
-		const buyPrice = askPriceLTC * SEED_LTC_AMOUNT;
+		const buyPrice = askPriceDASH * SEED_DASH_AMOUNT;
 
-        if ((btcAvailable>=buyPrice) && (averagePriceLTC!=null) && (lastBuyOrderIdLTC===null))
-            placeBuyOrderLTC();
-        else if ((ltcAvailable>=SEED_LTC_AMOUNT) && (lastBuyOrderIdLTC!=null))
-            placeSellOrderLTC();
+        if ((btcAvailable>=buyPrice) && (averagePriceDASH!=null) && (lastBuyOrderIdDASH===null))
+            placeBuyOrderDASH();
+        else if ((dashAvailable>=SEED_DASH_AMOUNT) && (lastBuyOrderIdDASH!=null))
+            placeSellOrderDASH();
          
-        if (averagePriceLTC===null)
-            averagePriceLTC = askPriceLTC;
+        if (averagePriceDASH===null)
+            averagePriceDASH = askPriceDASH;
         else
-            averagePriceLTC = (averagePriceLTC * 1000 + askPriceLTC) / 1001;
+            averagePriceDASH = (averagePriceDASH * 1000 + askPriceDASH) / 1001;
 	
 		setTimeout(()=>publicClient.getProductTicker(ETH_BTC_CURRENCY_PAIR, getProductTickerCallbackETH), 10000);
     }
@@ -197,10 +197,10 @@ const getAccountsCallback = (error, response, data) =>
 		        btcAvailable = parseFloat(item.available);
                 btcBalance = parseFloat(item.balance);
             }
-            else if (item.currency===LITECOIN_TICKER)
+            else if (item.currency===DASH_TICKER)
             {
-	            ltcAvailable = parseFloat(item.available);
-	            ltcBalance = parseFloat(item.balance);
+	            dashAvailable = parseFloat(item.available);
+	            dashBalance = parseFloat(item.balance);
             }
 			else if (item.currency===ETHEREUM_TICKER)
             {
@@ -210,47 +210,47 @@ const getAccountsCallback = (error, response, data) =>
         }
    
         console.log("[BITCOIN  WALLET] Available: " + btcAvailable.toFixed(8) + " BTC, Balance: " + btcBalance.toFixed(8) + " BTC");
-        console.log("[LITECOIN WALLET] Available: " + ltcAvailable.toFixed(8) + " LTC, Balance: " + ltcBalance.toFixed(8) + " LTC");
+        console.log("[DASH     WALLET] Available: " + dashAvailable.toFixed(8) + " DASH, Balance: " + dashBalance.toFixed(8) + " DASH");
 		console.log("[ETHEREUM WALLET] Available: " + ethAvailable.toFixed(8) + " ETH, Balance: " + ethBalance.toFixed(8) + " ETH\n");
 
 		console.log("[INFO] Number of cycles completed: " + numberOfCyclesCompleted + ", estimated profit: " + estimatedProfit.toFixed(8) + " BTC\n");
 
-        publicClient.getProductTicker(LTC_BTC_CURRENCY_PAIR, getProductTickerCallbackLTC);
+        publicClient.getProductTicker(DASH_BTC_CURRENCY_PAIR, getProductTickerCallbackDASH);
     }
 }
 
-const getFilledPriceCallbackLTC = (error, response, data) =>  
+const getFilledPriceCallbackDASH = (error, response, data) =>  
 {
 	if (error)
         return console.log(error);
 
 	if ((Array.isArray(data)) && (data.length >= 1))
 	{
-		lastBuyOrderPriceLTC = parseFloat(data[0].price);
+		lastBuyOrderPriceDASH = parseFloat(data[0].price);
 
 		let highestPrice;
 	
-		if (askPriceLTC>lastBuyOrderPriceLTC)
-		    highestPrice = askPriceLTC;
+		if (askPriceDASH>lastBuyOrderPriceDASH)
+		    highestPrice = askPriceDASH;
 		else
-		    highestPrice = lastBuyOrderPriceLTC;
+		    highestPrice = lastBuyOrderPriceDASH;
 
 		const sellPrice = highestPrice * SELL_PRICE_MULTIPLIER;
 
-		const sellSize = ltcAvailable - 0.000000001;
+		const sellSize = dashAvailable - 0.000000001;
 
 		const sellParams = 
 		{
 		    'price': sellPrice.toFixed(6),
 		    'size': sellSize.toFixed(8),
-		    'product_id': LTC_BTC_CURRENCY_PAIR,
+		    'product_id': DASH_BTC_CURRENCY_PAIR,
 		    'post_only': true,
 		};
 
 		console.log("");
-		console.log("\x1b[41m%s\x1b[0m", "[SELL ORDER] Price: " + sellPrice.toFixed(6) + " BTC, size: " + sellSize.toFixed(2) + " LTC"); 
+		console.log("\x1b[41m%s\x1b[0m", "[SELL ORDER] Price: " + sellPrice.toFixed(6) + " BTC, size: " + sellSize.toFixed(2) + " DASH"); 
 
-		setTimeout(()=>authenticatedClient.sell(sellParams, sellOrderCallbackLTC), 3000);
+		setTimeout(()=>authenticatedClient.sell(sellParams, sellOrderCallbackDASH), 3000);
 	}
 
 	return console.log(data);
@@ -295,25 +295,25 @@ const getFilledPriceCallbackETH = (error, response, data) =>
 
 // Functions
 
-function placeBuyOrderLTC() 
+function placeBuyOrderDASH() 
 {
-    const minimumBuyPrice = averagePriceLTC * MINIMUM_BUY_PRICE_MULTIPLIER;
+    const minimumBuyPrice = averagePriceDASH * MINIMUM_BUY_PRICE_MULTIPLIER;
 
-    if (askPriceLTC>=minimumBuyPrice)
+    if (askPriceDASH>=minimumBuyPrice)
     {
-        const buySize = SEED_LTC_AMOUNT;
+        const buySize = SEED_DASH_AMOUNT;
 
         const buyParams = 
 	    {
             'size': buySize.toFixed(8),
-            'product_id': LTC_BTC_CURRENCY_PAIR,
+            'product_id': DASH_BTC_CURRENCY_PAIR,
             'type': 'market'
 		};
 
 		console.log("");
-		console.log("\x1b[42m%s\x1b[0m", "[BUY ORDER] Size: " + buySize.toFixed(2) + " LTC");
+		console.log("\x1b[42m%s\x1b[0m", "[BUY ORDER] Size: " + buySize.toFixed(2) + " DASH");
 
-        authenticatedClient.buy(buyParams, buyOrderCallbackLTC);
+        authenticatedClient.buy(buyParams, buyOrderCallbackDASH);
     }
 }
 
@@ -339,14 +339,14 @@ function placeBuyOrderETH()
     }
 }
 
-function placeSellOrderLTC()
+function placeSellOrderDASH()
 {
 	const params = 
 	{
-    	order_id: lastBuyOrderIdLTC
+    	order_id: lastBuyOrderIdDASH
 	};
 
-	authenticatedClient.getFills(params, getFilledPriceCallbackLTC);
+	authenticatedClient.getFills(params, getFilledPriceCallbackDASH);
 }
 
 function placeSellOrderETH()
@@ -382,14 +382,14 @@ setInterval(() =>
 {
     console.log('\n\n');
 
-    askPriceLTC = null;
+    askPriceDASH = null;
 	askPriceETH = null;
     
     btcAvailable = 0;
     btcBalance = 0;
 
-    ltcAvailable = 0;
-    ltcBalance = 0;
+    dashAvailable = 0;
+    dashBalance = 0;
 
     ethAvailable = 0;
     ethBalance = 0;

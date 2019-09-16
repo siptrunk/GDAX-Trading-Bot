@@ -1,6 +1,6 @@
 # GDAX Trading Bot
 
-This program is an automated trading system that can autonomously trade the LTC / BTC and ETH / BTC pairs in the Coinbase Pro exchange. 
+This program is an automated trading system that can autonomously trade the DASH / BTC and ETH / BTC pairs in the Coinbase Pro exchange. 
 
 Keep in mind that trading is a risky activity that can involve a loss of money. You should only invest the amount you can afford to lose.
 
@@ -10,16 +10,16 @@ The trading strategy consists of issuing a large number of low value orders. The
 
 ### The seed
 
-The seed is the amount of each coin that the program will trade continuously to earn bitcoins. The greater the seed, the greater the benefit. The seed values must be set in the program variables SEED_LTC_AMOUNT and SEED_ETH_AMOUNT.
+The seed is the amount of each coin that the program will trade continuously to earn bitcoins. The greater the seed, the greater the benefit. The seed values must be set in the program variables SEED_DASH_AMOUNT and SEED_ETH_AMOUNT.
 
 You should be able to buy at least 10 seeds of each coin with your initial bitcoin balance. The more seeds you can buy, the easier it will be to recover from a losing streak.
 
 Example:
 
-- Your seeds are set as 1 ltc and 1 eth (default settings) 
-- The price of litecoin is 0.01 btc and the price of ethereum is 0.02 btc
+- Your seeds are set as 1 DASH and 1 ETH (default settings) 
+- The price of Dash is 0.01 BTC and the price of Ethereum is 0.02 BTC
 - You should be able to buy 10 seeds of each coin with your initial bitcoin balance
-- Your minimum bitcoin balance should be: (0.01 + 0.02) * 10 = 0.3 btc
+- Your minimum bitcoin balance should be: (0.01 + 0.02) * 10 = 0.3 BTC
 
 ## Quick guide
 
@@ -51,7 +51,7 @@ Save the three values of the API key in the following environment variables of t
 ### Configuration
 
 - Open the file "index.js" with a text editor
-- Set the seeds in the variables SEED_LTC_AMOUNT and SEED_ETH_AMOUNT
+- Set the seeds in the variables SEED_DASH_AMOUNT and SEED_ETH_AMOUNT
 
 ### Execution
 
