@@ -209,9 +209,9 @@ const getAccountsCallback = (error, response, data) =>
             }
         }
    
-        console.log("[BITCOIN  WALLET] Available: " + btcAvailable.toFixed(8) + " BTC, Balance: " + btcBalance.toFixed(8) + " BTC");
+        console.log("[BITCOIN  WALLET] Available: " + btcAvailable.toFixed(8) + " BTC,  Balance: " + btcBalance.toFixed(8) + " BTC");
         console.log("[DASH     WALLET] Available: " + dashAvailable.toFixed(8) + " DASH, Balance: " + dashBalance.toFixed(8) + " DASH");
-		console.log("[ETHEREUM WALLET] Available: " + ethAvailable.toFixed(8) + " ETH, Balance: " + ethBalance.toFixed(8) + " ETH\n");
+		console.log("[ETHEREUM WALLET] Available: " + ethAvailable.toFixed(8) + " ETH,  Balance: " + ethBalance.toFixed(8) + " ETH\n");
 
 		console.log("[INFO] Number of cycles completed: " + numberOfCyclesCompleted + ", estimated profit: " + estimatedProfit.toFixed(8) + " BTC\n");
 
