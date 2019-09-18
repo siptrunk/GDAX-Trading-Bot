@@ -135,9 +135,9 @@ const getProductTickerCallbackDASH = (error, response, data) =>
 	    askPriceDASH = parseFloat(data.ask);
         
         if (averagePriceDASH===null)
-            console.log("[DASH     TICKER] Now: " + askPriceDASH.toFixed(6) + " BTC, time: " + data.time);
+            console.log("[DASH  TICKER] Now: " + askPriceDASH.toFixed(6) + " BTC, time: " + data.time);
         else
-            console.log("[DASH     TICKER] Now: " + askPriceDASH.toFixed(6) + " BTC, average: " + averagePriceDASH.toFixed(6) + " BTC, time: " + data.time);
+            console.log("[DASH  TICKER] Now: " + askPriceDASH.toFixed(6) + " BTC, average: " + averagePriceDASH.toFixed(6) + " BTC, time: " + data.time);
 
 		const buyPrice = askPriceDASH * SEED_DASH_AMOUNT;
 
@@ -165,9 +165,9 @@ const getProductTickerCallbackETH= (error, response, data) =>
 	    askPriceETH = parseFloat(data.ask);
        
         if (averagePriceETH==null)
-            console.log("\n[ETHEREUM TICKER] Now: " + askPriceETH.toFixed(6) + " BTC, time: " + data.time);
+            console.log("\n[ETHER TICKER] Now: " + askPriceETH.toFixed(6) + " BTC, time: " + data.time);
         else
-            console.log("\n[ETHEREUM TICKER] Now: " + askPriceETH.toFixed(6) + " BTC, average: " + averagePriceETH.toFixed(6) + " BTC, time: " + data.time);
+            console.log("\n[ETHER TICKER] Now: " + askPriceETH.toFixed(6) + " BTC, average: " + averagePriceETH.toFixed(6) + " BTC, time: " + data.time);
 		
 		const buyPrice = askPriceETH * SEED_ETH_AMOUNT;
 
@@ -209,9 +209,9 @@ const getAccountsCallback = (error, response, data) =>
             }
         }
    
-        console.log("[BITCOIN  WALLET] Available: " + btcAvailable.toFixed(8) + " BTC,  Balance: " + btcBalance.toFixed(8) + " BTC");
-        console.log("[DASH     WALLET] Available: " + dashAvailable.toFixed(8) + " DASH, Balance: " + dashBalance.toFixed(8) + " DASH");
-		console.log("[ETHEREUM WALLET] Available: " + ethAvailable.toFixed(8) + " ETH,  Balance: " + ethBalance.toFixed(8) + " ETH\n");
+        console.log("[BITCOIN WALLET] Available: " + btcAvailable.toFixed(8) + " BTC,  Balance: " + btcBalance.toFixed(8) + " BTC");
+        console.log("[DASH    WALLET] Available: " + dashAvailable.toFixed(8) + " DASH, Balance: " + dashBalance.toFixed(8) + " DASH");
+		console.log("[ETHER   WALLET] Available: " + ethAvailable.toFixed(8) + " ETH,  Balance: " + ethBalance.toFixed(8) + " ETH\n");
 
 		console.log("[INFO] Number of cycles completed: " + numberOfCyclesCompleted + ", estimated profit: " + estimatedProfit.toFixed(8) + " BTC\n");
 
