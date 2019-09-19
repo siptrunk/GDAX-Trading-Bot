@@ -237,12 +237,12 @@ const getFilledPriceCallbackDASH = (error, response, data) =>
 
 		const sellPrice = highestPrice * SELL_PRICE_MULTIPLIER;
 
-		const sellSize = dashAvailable - 0.000000001;
+		const sellSize = dashAvailable - 0.0005;
 
 		const sellParams = 
 		{
 		    'price': sellPrice.toFixed(6),
-		    'size': sellSize.toFixed(8),
+		    'size': sellSize.toFixed(3),
 		    'product_id': DASH_BTC_CURRENCY_PAIR,
 		    'post_only': true,
 		};
@@ -305,7 +305,7 @@ function placeBuyOrderDASH()
 
         const buyParams = 
 	    {
-            'size': buySize.toFixed(8),
+            'size': buySize.toFixed(3),
             'product_id': DASH_BTC_CURRENCY_PAIR,
             'type': 'market'
 		};
