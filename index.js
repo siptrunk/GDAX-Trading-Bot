@@ -30,7 +30,7 @@ const ETHEREUM_TICKER = 'ETH';
 const SLEEP_TIME = 30000;
 
 // The seed is the amount of coins that the program will trade continuously
-const SEED_TEZOS_AMOUNT = 1.0;
+const SEED_XTZ_AMOUNT = 1.0;
 const SEED_ETH_AMOUNT = 1.0;
 
 // Profit percentage trading a seed
@@ -98,7 +98,7 @@ const sellOrderCallbackTEZOS = (error, response, data) =>
 
     if ((data!=null) && (data.status==='pending'))
     {
-        estimatedProfit = estimatedProfit + SEED_TEZOS_AMOUNT * (parseFloat(data.price) - lastBuyOrderPriceTEZOS);
+        estimatedProfit = estimatedProfit + SEED_XTZ_AMOUNT * (parseFloat(data.price) - lastBuyOrderPriceTEZOS);
 		averagePriceTEZOS = lastBuyOrderPriceTEZOS;          
 		lastBuyOrderPriceTEZOS = null;
 		lastBuyOrderIdTEZOS = null;
@@ -139,11 +139,11 @@ const getProductTickerCallbackTEZOS = (error, response, data) =>
         else
             console.log("[TEZOS TICKER] Now: " + askPriceTEZOS.toFixed(6) + " BTC, average: " + averagePriceTEZOS.toFixed(6) + " BTC, time: " + data.time);
 
-		const buyPrice = askPriceTEZOS * SEED_TEZOS_AMOUNT;
+		const buyPrice = askPriceTEZOS * SEED_XTZ_AMOUNT;
 
         if ((btcAvailable>=buyPrice) && (averagePriceTEZOS!=null) && (lastBuyOrderIdTEZOS===null))
             placeBuyOrderTEZOS();
-        else if ((tezosAvailable>=SEED_TEZOS_AMOUNT) && (lastBuyOrderIdTEZOS!=null))
+        else if ((tezosAvailable>=SEED_XTZ_AMOUNT) && (lastBuyOrderIdTEZOS!=null))
             placeSellOrderTEZOS();
          
         if (averagePriceTEZOS===null)
@@ -301,7 +301,7 @@ function placeBuyOrderTEZOS()
 
     if (askPriceTEZOS>=minimumBuyPrice)
     {
-        const buySize = SEED_TEZOS_AMOUNT;
+        const buySize = SEED_XTZ_AMOUNT;
 
         const buyParams = 
 	    {
