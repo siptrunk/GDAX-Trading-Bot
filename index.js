@@ -242,7 +242,7 @@ const getFilledPriceCallbackTEZOS = (error, response, data) =>
 		const sellParams = 
 		{
 		    'price': sellPrice.toFixed(6),
-		    'size': sellSize.toFixed(3),
+		    'size': sellSize.toFixed(2),
 		    'product_id': XTZ_BTC_CURRENCY_PAIR,
 		    'post_only': true,
 		};
