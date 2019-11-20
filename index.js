@@ -237,12 +237,12 @@ const getFilledPriceCallbackTEZOS = (error, response, data) =>
 
 		const sellPrice = highestPrice * SELL_PRICE_MULTIPLIER;
 
-		const sellSize = tezosAvailable - 0.005;
+		const sellSize = tezosAvailable - 0.000000001;
 
 		const sellParams = 
 		{
 		    'price': sellPrice.toFixed(6),
-		    'size': sellSize.toFixed(2),
+		    'size': sellSize.toFixed(4),
 		    'product_id': XTZ_BTC_CURRENCY_PAIR,
 		    'post_only': true,
 		};
