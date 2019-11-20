@@ -327,7 +327,7 @@ function placeBuyOrderETH()
 
         const buyParams = 
 	    {
-            'size': buySize.toFixed(8),
+            'size': buySize.toFixed(2),
             'product_id': ETH_BTC_CURRENCY_PAIR,
             'type': 'market'
 		};
