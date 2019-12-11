@@ -61,6 +61,6 @@ Save the three values of the API key in the following environment variables of t
 
 ## Donations
 
-Please consider making a donation to the following Bitcoin Confidential address (BC):
+Please consider making a donation to the following Monero address:
 
-B9uuWVj83v75AHNpDnmwxPFSoGooKwZiS2zL9bRQirBT7WWQaa6LfkuwbP8K9Z15xTrySeFbTzo2FdJVse9xexH9tTN25bpWvw4kDE
+48UKr19MznsFVurfcYmR92WubUYTT3TCMFgfk5oF1qK9bcefjrqYEwicDCi9ZyP5ABefDbCyAdg7d4Q8Mf2Kys1YT5K2CVc
