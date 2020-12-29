@@ -4,13 +4,13 @@
  ============================================================================
  Name        : GDAX Trading Bot
  Author      : Kenshiro
- Version     : 7.05
+ Version     : 7.06
  Copyright   : GNU General Public License (GPLv3)
  Description : Trading bot for the Coinbase Pro exchange
  ============================================================================
  */
 
-const APP_VERSION = "v7.05";
+const APP_VERSION = "v7.06";
 
 const GdaxModule = require('coinbase-pro');
 
@@ -20,17 +20,17 @@ const SECRET = process.env.TRADING_BOT_SECRET || '';
 
 const GDAX_URI = 'https://api.pro.coinbase.com';
 
-const XTZ_BTC_CURRENCY_PAIR = 'XTZ-BTC';
+const MKR_BTC_CURRENCY_PAIR = 'MKR-BTC';
 const ETH_BTC_CURRENCY_PAIR = 'ETH-BTC';
 
 const BITCOIN_TICKER = 'BTC';
-const TEZOS_TICKER = 'XTZ';
+const MAKER_TICKER = 'MKR';
 const ETHEREUM_TICKER = 'ETH';
 
 const SLEEP_TIME = 30000;
 
 // The seed is the amount of coins that the program will trade continuously
-const SEED_XTZ_AMOUNT = 1.0;
+const SEED_MKR_AMOUNT = 1.0;
 const SEED_ETH_AMOUNT = 1.0;
 
 // Profit percentage trading a seed
@@ -40,10 +40,10 @@ const MINIMUM_BUY_PRICE_MULTIPLIER = 100.5 / 100.0;
 
 const SELL_PRICE_MULTIPLIER = (100.0 + PROFIT_PERCENTAGE) / 100.0;
 
-let askPriceTEZOS = null;
-let averagePriceTEZOS = null;
-let lastBuyOrderIdTEZOS = null;
-let lastBuyOrderPriceTEZOS = null;
+let askPriceMAKER = null;
+let averagePriceMAKER = null;
+let lastBuyOrderIdMAKER = null;
+let lastBuyOrderPriceMAKER = null;
 
 let askPriceETH = null;
 let averagePriceETH = null;
@@ -53,8 +53,8 @@ let lastBuyOrderPriceETH = null;
 let btcAvailable = 0;
 let btcBalance = 0;
 
-let tezosAvailable = 0;
-let tezosBalance = 0;
+let mkrAvailable = 0;
+let mkrBalance = 0;
 
 let ethAvailable = 0;
 let ethBalance = 0;
@@ -68,13 +68,13 @@ let publicClient = null;
 
 // Callbacks
 
-const buyOrderCallbackTEZOS = (error, response, data) => 
+const buyOrderCallbackMAKER = (error, response, data) => 
 {
     if (error)
         return console.log(error);
 
     if ((data!=null) && (data.status==='pending'))
-		lastBuyOrderIdTEZOS = data.id;
+		lastBuyOrderIdMAKER = data.id;
 
     return console.log(data);
 }
@@ -91,17 +91,17 @@ const buyOrderCallbackETH = (error, response, data) =>
 }
 
 
-const sellOrderCallbackTEZOS = (error, response, data) => 
+const sellOrderCallbackMAKER = (error, response, data) => 
 {
     if (error)
         return console.log(error);
 
     if ((data!=null) && (data.status==='pending'))
     {
-        estimatedProfit = estimatedProfit + SEED_XTZ_AMOUNT * (parseFloat(data.price) - lastBuyOrderPriceTEZOS);
-		averagePriceTEZOS = lastBuyOrderPriceTEZOS;          
-		lastBuyOrderPriceTEZOS = null;
-		lastBuyOrderIdTEZOS = null;
+        estimatedProfit = estimatedProfit + SEED_MKR_AMOUNT * (parseFloat(data.price) - lastBuyOrderPriceMAKER);
+		averagePriceMAKER = lastBuyOrderPriceMAKER;          
+		lastBuyOrderPriceMAKER = null;
+		lastBuyOrderIdMAKER = null;
         numberOfCyclesCompleted++;
  	}
 
@@ -125,31 +125,31 @@ const sellOrderCallbackETH = (error, response, data) =>
     return console.log(data);
 }
 
-const getProductTickerCallbackTEZOS = (error, response, data) => 
+const getProductTickerCallbackMAKER = (error, response, data) => 
 {
 	if (error)
         return console.log(error);
 
     if ((data!=null) && (data.ask!=null) && (data.time!=null))
     {
-	    askPriceTEZOS = parseFloat(data.ask);
+	    askPriceMAKER = parseFloat(data.ask);
         
-        if (averagePriceTEZOS===null)
-            console.log("[TEZOS TICKER] Now: " + askPriceTEZOS.toFixed(6) + " BTC, time: " + data.time);
+        if (averagePriceMAKER===null)
+            console.log("[MAKER TICKER] Now: " + askPriceMAKER.toFixed(5) + " BTC, time: " + data.time);
         else
-            console.log("[TEZOS TICKER] Now: " + askPriceTEZOS.toFixed(6) + " BTC, average: " + averagePriceTEZOS.toFixed(6) + " BTC, time: " + data.time);
+            console.log("[MAKER TICKER] Now: " + askPriceMAKER.toFixed(5) + " BTC, average: " + averagePriceMAKER.toFixed(5) + " BTC, time: " + data.time);
 
-		const buyPrice = askPriceTEZOS * SEED_XTZ_AMOUNT;
+		const buyPrice = askPriceMAKER * SEED_MKR_AMOUNT;
 
-        if ((btcAvailable>=buyPrice) && (averagePriceTEZOS!=null) && (lastBuyOrderIdTEZOS===null))
-            placeBuyOrderTEZOS();
-        else if ((tezosAvailable>=SEED_XTZ_AMOUNT) && (lastBuyOrderIdTEZOS!=null))
-            placeSellOrderTEZOS();
+        if ((btcAvailable>=buyPrice) && (averagePriceMAKER!=null) && (lastBuyOrderIdMAKER===null))
+            placeBuyOrderMAKER();
+        else if ((mkrAvailable>=SEED_MKR_AMOUNT) && (lastBuyOrderIdMAKER!=null))
+            placeSellOrderMAKER();
          
-        if (averagePriceTEZOS===null)
-            averagePriceTEZOS = askPriceTEZOS;
+        if (averagePriceMAKER===null)
+            averagePriceMAKER = askPriceMAKER;
         else
-            averagePriceTEZOS = (averagePriceTEZOS * 1000 + askPriceTEZOS) / 1001;
+            averagePriceMAKER = (averagePriceMAKER * 1000 + askPriceMAKER) / 1001;
 	
 		setTimeout(()=>publicClient.getProductTicker(ETH_BTC_CURRENCY_PAIR, getProductTickerCallbackETH), 10000);
     }
@@ -165,9 +165,9 @@ const getProductTickerCallbackETH= (error, response, data) =>
 	    askPriceETH = parseFloat(data.ask);
        
         if (averagePriceETH==null)
-            console.log("\n[ETHER TICKER] Now: " + askPriceETH.toFixed(6) + " BTC, time: " + data.time);
+            console.log("\n[ETHER TICKER] Now: " + askPriceETH.toFixed(5) + " BTC, time: " + data.time);
         else
-            console.log("\n[ETHER TICKER] Now: " + askPriceETH.toFixed(6) + " BTC, average: " + averagePriceETH.toFixed(6) + " BTC, time: " + data.time);
+            console.log("\n[ETHER TICKER] Now: " + askPriceETH.toFixed(5) + " BTC, average: " + averagePriceETH.toFixed(5) + " BTC, time: " + data.time);
 		
 		const buyPrice = askPriceETH * SEED_ETH_AMOUNT;
 
@@ -197,10 +197,10 @@ const getAccountsCallback = (error, response, data) =>
 		        btcAvailable = parseFloat(item.available);
                 btcBalance = parseFloat(item.balance);
             }
-            else if (item.currency===TEZOS_TICKER)
+            else if (item.currency===MAKER_TICKER)
             {
-	            tezosAvailable = parseFloat(item.available);
-	            tezosBalance = parseFloat(item.balance);
+	            mkrAvailable = parseFloat(item.available);
+	            mkrBalance = parseFloat(item.balance);
             }
 			else if (item.currency===ETHEREUM_TICKER)
             {
@@ -210,47 +210,47 @@ const getAccountsCallback = (error, response, data) =>
         }
    
         console.log("[BITCOIN WALLET] Available: " + btcAvailable.toFixed(8) + " BTC,  Balance: " + btcBalance.toFixed(8) + " BTC");
-        console.log("[TEZOS   WALLET] Available: " + tezosAvailable.toFixed(8) + " XTZ,  Balance: " + tezosBalance.toFixed(8) + " XTZ");
+        console.log("[MAKER   WALLET] Available: " + mkrAvailable.toFixed(8) + " MKR,  Balance: " + mkrBalance.toFixed(8) + " MKR");
 		console.log("[ETHER   WALLET] Available: " + ethAvailable.toFixed(8) + " ETH,  Balance: " + ethBalance.toFixed(8) + " ETH\n");
 
 		console.log("[INFO] Number of cycles completed: " + numberOfCyclesCompleted + ", estimated profit: " + estimatedProfit.toFixed(8) + " BTC\n");
 
-        publicClient.getProductTicker(XTZ_BTC_CURRENCY_PAIR, getProductTickerCallbackTEZOS);
+        publicClient.getProductTicker(MKR_BTC_CURRENCY_PAIR, getProductTickerCallbackMAKER);
     }
 }
 
-const getFilledPriceCallbackTEZOS = (error, response, data) =>  
+const getFilledPriceCallbackMAKER = (error, response, data) =>  
 {
 	if (error)
         return console.log(error);
 
 	if ((Array.isArray(data)) && (data.length >= 1))
 	{
-		lastBuyOrderPriceTEZOS = parseFloat(data[0].price);
+		lastBuyOrderPriceMAKER = parseFloat(data[0].price);
 
 		let highestPrice;
 	
-		if (askPriceTEZOS>lastBuyOrderPriceTEZOS)
-		    highestPrice = askPriceTEZOS;
+		if (askPriceMAKER>lastBuyOrderPriceMAKER)
+		    highestPrice = askPriceMAKER;
 		else
-		    highestPrice = lastBuyOrderPriceTEZOS;
+		    highestPrice = lastBuyOrderPriceMAKER;
 
 		const sellPrice = highestPrice * SELL_PRICE_MULTIPLIER;
 
-		const sellSize = tezosAvailable - 0.000000001;
+		const sellSize = mkrAvailable - 0.0000001;
 
 		const sellParams = 
 		{
-		    'price': sellPrice.toFixed(6),
-		    'size': sellSize.toFixed(4),
-		    'product_id': XTZ_BTC_CURRENCY_PAIR,
+		    'price': sellPrice.toFixed(5),
+		    'size': sellSize.toFixed(6),
+		    'product_id': MKR_BTC_CURRENCY_PAIR,
 		    'post_only': true,
 		};
 
 		console.log("");
-		console.log("\x1b[41m%s\x1b[0m", "[SELL ORDER] Price: " + sellPrice.toFixed(6) + " BTC, size: " + sellSize.toFixed(2) + " XTZ"); 
+		console.log("\x1b[41m%s\x1b[0m", "[SELL ORDER] Price: " + sellPrice.toFixed(5) + " BTC, size: " + sellSize.toFixed(2) + " MKR"); 
 
-		setTimeout(()=>authenticatedClient.sell(sellParams, sellOrderCallbackTEZOS), 3000);
+		setTimeout(()=>authenticatedClient.sell(sellParams, sellOrderCallbackMAKER), 3000);
 	}
 
 	return console.log(data);
@@ -285,7 +285,7 @@ const getFilledPriceCallbackETH = (error, response, data) =>
 		};
 
 		console.log("");
-		console.log("\x1b[41m%s\x1b[0m", "[SELL ORDER] Price: " + sellPrice.toFixed(6) + " BTC, size: " + sellSize.toFixed(2) + " ETH"); 
+		console.log("\x1b[41m%s\x1b[0m", "[SELL ORDER] Price: " + sellPrice.toFixed(5) + " BTC, size: " + sellSize.toFixed(2) + " ETH"); 
 
 		setTimeout(()=>authenticatedClient.sell(sellParams, sellOrderCallbackETH), 3000);
 	}
@@ -295,25 +295,25 @@ const getFilledPriceCallbackETH = (error, response, data) =>
 
 // Functions
 
-function placeBuyOrderTEZOS() 
+function placeBuyOrderMAKER() 
 {
-    const minimumBuyPrice = averagePriceTEZOS * MINIMUM_BUY_PRICE_MULTIPLIER;
+    const minimumBuyPrice = averagePriceMAKER * MINIMUM_BUY_PRICE_MULTIPLIER;
 
-    if (askPriceTEZOS>=minimumBuyPrice)
+    if (askPriceMAKER>=minimumBuyPrice)
     {
-        const buySize = SEED_XTZ_AMOUNT;
+        const buySize = SEED_MKR_AMOUNT;
 
         const buyParams = 
 	    {
             'size': buySize.toFixed(2),
-            'product_id': XTZ_BTC_CURRENCY_PAIR,
+            'product_id': MKR_BTC_CURRENCY_PAIR,
             'type': 'market'
 		};
 
 		console.log("");
-		console.log("\x1b[42m%s\x1b[0m", "[BUY ORDER] Size: " + buySize.toFixed(2) + " XTZ");
+		console.log("\x1b[42m%s\x1b[0m", "[BUY ORDER] Size: " + buySize.toFixed(2) + " MKR");
 
-        authenticatedClient.buy(buyParams, buyOrderCallbackTEZOS);
+        authenticatedClient.buy(buyParams, buyOrderCallbackMAKER);
     }
 }
 
@@ -339,14 +339,14 @@ function placeBuyOrderETH()
     }
 }
 
-function placeSellOrderTEZOS()
+function placeSellOrderMAKER()
 {
 	const params = 
 	{
-    	order_id: lastBuyOrderIdTEZOS
+    	order_id: lastBuyOrderIdMAKER
 	};
 
-	authenticatedClient.getFills(params, getFilledPriceCallbackTEZOS);
+	authenticatedClient.getFills(params, getFilledPriceCallbackMAKER);
 }
 
 function placeSellOrderETH()
@@ -382,14 +382,14 @@ setInterval(() =>
 {
     console.log('\n\n');
 
-    askPriceTEZOS = null;
+    askPriceMAKER = null;
 	askPriceETH = null;
     
     btcAvailable = 0;
     btcBalance = 0;
 
-    tezosAvailable = 0;
-    tezosBalance = 0;
+    mkrAvailable = 0;
+    mkrBalance = 0;
 
     ethAvailable = 0;
     ethBalance = 0;
