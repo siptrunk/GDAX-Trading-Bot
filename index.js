@@ -20,18 +20,18 @@ const SECRET = process.env.TRADING_BOT_SECRET || '';
 
 const GDAX_URI = 'https://api.pro.coinbase.com';
 
-const MKR_BTC_CURRENCY_PAIR = 'XRP-BTC';
+const MKR_BTC_CURRENCY_PAIR = 'ADA-BTC';
 const ETH_BTC_CURRENCY_PAIR = 'ETH-BTC';
 
 const BITCOIN_TICKER = 'BTC';
-const MAKER_TICKER = 'XRP';
+const MAKER_TICKER = 'ADA';
 const ETHEREUM_TICKER = 'ETH';
 
 const SLEEP_TIME = 30000;
 
 // The seed is the amount of coins that the program will trade continuously
 const SEED_MKR_AMOUNT = 1.0;
-const SEED_ETH_AMOUNT = 0.002;
+const SEED_ETH_AMOUNT = 0.0102;
 
 // Profit percentage trading a seed
 const PROFIT_PERCENTAGE = 2.0; 
@@ -361,6 +361,13 @@ function placeSellOrderETH()
 
 // Main logic
 
+console.log("\n");
+console.log("                  _  ");
+console.log("   ___ _   _ _ __(_)_ __   __ _");
+console.log("  / __| | | | '__| | '_ \ / _` |");
+console.log("  \__ \ |_| | |  | | | | | (_| |");
+console.log("  |___/\__,_|_|  |_|_| |_|\__,_|");
+console.log("\n Customized by github.com/siptrunk http://crypto.aaron.fund");
 console.log("\n");
 console.log("          __________  ___   _  __    ______               ___");
 console.log("         / ____/ __ \\/   | | |/ /   /_  __/________ _____/ (_)___  ____ _");
